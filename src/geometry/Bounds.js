@@ -17,6 +17,7 @@ export class Bounds {
         this.max = max;
     }
 
+    // Create bounds from an array of vertices
     static fromVertices(vertices) {
         if (!vertices || vertices.length === 0) {
             return null;
@@ -37,14 +38,16 @@ export class Bounds {
         return { min: new Vec2(minX, minY), max: new Vec2(maxX, maxY) };
     }
 
-    contains(points) {
-        return (points.x >= this.min.x &&
-                points.x <= this.max.x &&
-                points.y >= this.min.y &&
-                points.y <= this.max.y
+    // Check if a point is inside the bounds
+    contains(point) {
+        return (point.x >= this.min.x &&
+                point.x <= this.max.x &&
+                point.y >= this.min.y &&
+                point.y <= this.max.y
         );
     }
 
+    // Check if another AABB overlaps
     overlaps(otherBounds) {
         return (this.min.x < otherBounds.max.x &&
                 this.max.x > otherBounds.min.x &&
@@ -53,6 +56,7 @@ export class Bounds {
         );
     }
 
+    // Translate bounds by a given offset in-place
     translate(offset) {
         this.min.x += offset.x;
         this.min.y += offset.y;
