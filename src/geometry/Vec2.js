@@ -20,4 +20,8 @@ export class Vec2 {
     scale(scalar) {
         return new Vec2(this.x * scalar, this.y * scalar);
     }
+
+    clone() {
+        return new Vec2(this.x, this.y);
+    }
 }
