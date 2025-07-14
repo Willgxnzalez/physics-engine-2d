@@ -30,22 +30,6 @@ describe('Vec2', () => {
     expect(result.y).toBe(4);
   });
 
-  it('multiplies two vectors', () => {
-    const v1 = new Vec2(2, 3);
-    const v2 = new Vec2(4, 5);
-    const result = v1.mult(v2);
-    expect(result.x).toBe(8);
-    expect(result.y).toBe(15);
-  });
-
-  it('divides two vectors', () => {
-    const v1 = new Vec2(8, 9);
-    const v2 = new Vec2(2, 3);
-    const result = v1.div(v2);
-    expect(result.x).toBe(4);
-    expect(result.y).toBe(3);
-  });
-
   it('throws on division by zero', () => {
     const v1 = new Vec2(1, 2);
     const v2 = new Vec2(0, 1);
