@@ -58,9 +58,7 @@ export class Bounds {
 
     // Translate bounds by a given offset in-place
     translate(offset) {
-        this.min.x += offset.x;
-        this.min.y += offset.y;
-        this.max.x += offset.x;
-        this.max.y += offset.y;
+        this.min.translate(offset);
+        this.max.translate(offset);
     }
 }
