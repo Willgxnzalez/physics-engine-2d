@@ -11,8 +11,8 @@ const HEIGHT = canvas.height;
 const engine = new Engine();
 
 const ground = Shapes.rectangle(WIDTH - WIDTH/2, HEIGHT - 25, WIDTH, 50, { isStatic: true });
-const box = Shapes.rectangle(300, 0, 50, 50, { isStatic: false });
-const box2 = Shapes.rectangle(300, 200, 50, 50, { isStatic: false });
+const box = Shapes.rectangle(300, 0, 50, 50);
+const box2 = Shapes.rectangle(300, 200, 50, 50);
 
 engine.addBody(ground);
 engine.addBody(box);

@@ -5,10 +5,17 @@ export class Renderer {
 
         for (const body of bodies) {
             ctx.beginPath();
-            ctx.moveTo(body.vertices[0].x, body.vertices[0].y);
-            for (let i = 1; i < body.vertices.length; i++) {
-                ctx.lineTo(body.vertices[i].x, body.vertices[i].y);
+            
+            const vertices = body.vertices;
+            if (vertices.length > 0) {
+                const firstVertex = vertices.at(0);
+                ctx.moveTo(firstVertex.x, firstVertex.y);
+                
+                for (const vertex of vertices) {
+                    ctx.lineTo(vertex.x, vertex.y);
+                }
             }
+            
             ctx.closePath();
             ctx.stroke();
         }
