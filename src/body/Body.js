@@ -1,39 +1,51 @@
 /**
- * A rigid body in 2D space.
+ * A Rigid body in 2D space.
  */
 
-import { Vec2 } from "../geometry/Vec2.js";
-import { Bounds } from "../geometry/Bounds.js";
-import { Vertices } from "../geometry/Vertices.js";
+import { Vec2 } from '../geometry/Vec2.js';
+import { Bounds } from '../geometry/Bounds.js';
 
 export class Body {
     constructor({
         position = new Vec2(0, 0),
         velocity = new Vec2(0, 0),
+        angle = 0, // in radians
         isStatic = false,
         mass = 1,
         vertices = []
     } = {}) {
         this.position = position.clone();
         this.velocity = velocity.clone();
-
+        this.angle = angle;
         this.isStatic = !!isStatic;
         this.mass = this.isStatic ? Infinity : mass;
 
-        this.vertices = vertices;
+        this.localVertices = vertices; // original shape around (0,0) in CCW order
+        this.vertices = [];  // world space vertices
+
+        this.computeWorldVertices();
         this.bounds = Bounds.fromVertices(this.vertices);
-        console.log(`Created body at ${this.position.x}, ${this.position.y} with mass ${this.mass} and static status ${this.isStatic} with bounds: ${JSON.stringify(this.bounds)}`);
+    }
+
+    computeWorldVertices() {
+        const cos = Math.cos(this.angle);
+        const sin = Math.sin(this.angle);
+
+        this.vertices = this.localVertices.map(v =>
+            new Vec2(
+                v.x * cos - v.y * sin + this.position.x,
+                v.x * sin + v.y * cos + this.position.y
+            )
+        );
     }
 
     update(dt, gravity) {
         if (this.isStatic) return;
 
-        this.velocity.y += gravity.y * dt;
+        this.velocity.y += gravity* dt; // Semi-implicit Euler integration
+        this.position.translate(this.velocity.scale(dt));
 
-        const displacement = this.velocity.scale(dt);
-        this.position.translate(displacement);
-
-        Vertices.translate(this.vertices, displacement);
-        this.bounds.translate(displacement);
+        this.computeWorldVertices();
+        this.bounds = Bounds.fromVertices(this.vertices);
     }
 }

@@ -5,13 +5,18 @@ import { Renderer } from './src/render/Renderer.js';
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
+const WIDTH = canvas.width;
+const HEIGHT = canvas.height;
+
 const engine = new Engine();
 
-const ground = Shapes.rectangle(400, 580, 800, 40, { isStatic: true });
-const box = Shapes.rectangle(400, 100, 50, 50);
+const ground = Shapes.rectangle(WIDTH - WIDTH/2, HEIGHT - 25, WIDTH, 50, { isStatic: true });
+const box = Shapes.rectangle(300, 0, 50, 50, { isStatic: false });
+const box2 = Shapes.rectangle(300, 200, 50, 50, { isStatic: false });
 
 engine.addBody(ground);
 engine.addBody(box);
+engine.addBody(box2);
 
 function loop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);

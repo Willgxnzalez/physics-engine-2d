@@ -2,7 +2,7 @@
 export class Engine {
     constructor() {
         this.bodies = [];
-        this.gravity = 50
+        this.gravity = 300; // Gravity acceleration in pixels per second squared
     }
 
     addBody(body) {

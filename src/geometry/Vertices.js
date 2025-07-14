@@ -1,5 +1,6 @@
 /**
  * Utility class for working with arrays of 2D vertices.
+ * Vertices must be in **counter-clockwise (CCW)** order.
  */
 
 import { Vec2 } from './Vec2.js';
