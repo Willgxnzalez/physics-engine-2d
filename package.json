@@ -1,0 +1,16 @@
+{
+  "name": "physics2d-engine",
+  "version": "0.1.0",
+  "description": "A modular 2D physics engine in JavaScript with broad-phase, SAT, and impulse resolution.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^1.6.1"
+  }
+}

@@ -11,7 +11,7 @@ export class Engine {
 
     update(dt) {
         for (const body of this.bodies) {
-            body.udpate(dt, this.gravity);
+            body.update(dt, this.gravity);
         }
     }
 }

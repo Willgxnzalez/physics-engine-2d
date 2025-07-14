@@ -22,6 +22,7 @@ export class Body {
 
         this.vertices = vertices;
         this.bounds = Bounds.fromVertices(this.vertices);
+        console.log(`Created body at ${this.position.x}, ${this.position.y} with mass ${this.mass} and static status ${this.isStatic} with bounds: ${JSON.stringify(this.bounds)}`);
     }
 
     update(dt, gravity) {

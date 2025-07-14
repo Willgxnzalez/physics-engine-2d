@@ -1,5 +1,5 @@
 export class Renderer {
-    static render(scene, bodies) {
+    static render(ctx, bodies) {
         ctx.strokeStyle = 'white';
         ctx.lineWidth = 1;
 

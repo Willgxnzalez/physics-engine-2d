@@ -35,7 +35,7 @@ export class Bounds {
             if (v.y > maxY) maxY = v.y;
         }
 
-        return { min: new Vec2(minX, minY), max: new Vec2(maxX, maxY) };
+        return new Bounds(new Vec2(minX, minY), new Vec2(maxX, maxY));
     }
 
     // Check if a point is inside the bounds
