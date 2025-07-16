@@ -27,10 +27,12 @@ export class Shapes {
         });
     }
 
-    static Circle(x, y, radius, segments = 32, options = {}) {
+    static Circle(x, y, radius, options = {}) {
         if (radius == null) {
             throw new Error('Circle requires a radius');
         }
+
+        const { segments = 32, ...restOptions } = options;
 
         if (segments < 3) {
             throw new Error('Circle must have at least 3 segments');
@@ -43,7 +45,7 @@ export class Shapes {
         }
 
         return new Body({
-            ...options,
+            ...restOptions, // Pass other options like mass, restitution etc.
             position: new Vec2(x, y),
             vertices: verts,
             type: 'circle',
@@ -51,5 +53,4 @@ export class Shapes {
             segments
         });
     }
-
 }
