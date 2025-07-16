@@ -32,7 +32,7 @@ export class Shapes {
             throw new Error('Circle requires a radius');
         }
 
-        const { segments = 32, ...restOptions } = options;
+        const { segments = 24, ...restOptions } = options;
 
         if (segments < 3) {
             throw new Error('Circle must have at least 3 segments');

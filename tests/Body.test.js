@@ -42,7 +42,7 @@ describe('Body - Physical Property Setup', () => {
             expect(body.angularVelocity).toBe(2);
         });
     });
-
+    
     describe('Static Bodies', () => {
         it('should create static body with infinite mass and inertia', () => {
             const body = Shapes.Rect(0, 0, 10, 10, { isStatic: true });
@@ -79,7 +79,7 @@ describe('Body - Physical Property Setup', () => {
 
     describe('Shape-Based Inertia Calculation', () => {
         it('should calculate inertia for circle shape', () => {
-            const body = Shapes.Circle(0, 0, 10, 32, { mass: 4 });
+            const body = Shapes.Circle(0, 0, 10, { mass: 4 });
             
             // I = (m/2) * r²  = (4/2) * 100 = 200
             expect(body.inertia).toBeCloseTo(200, 2);
@@ -121,7 +121,7 @@ describe('Body - Physical Property Setup', () => {
 
     describe('Mass Updates', () => {
         it('should update mass and recalculate derived properties', () => {
-            const body = Shapes.Circle(0, 0, 5, 32, { mass: 2 });
+            const body = Shapes.Circle(0, 0, 5, { mass: 2 });
             
             expect(body.mass).toBe(2);
             expect(body.invMass).toBe(0.5);
@@ -237,6 +237,45 @@ describe('Body - Physical Property Setup', () => {
             
             expect(body.inertia).toBe(0);
             expect(body.invInertia).toBe(0);
+        });
+    });
+
+    describe('Translation and Rotation', () => {
+        let body;
+
+        beforeEach(() => {
+            body = Shapes.Rect(0, 0, 10, 10, { mass: 2 });
+        });
+
+        it('should translate body position', () => {
+            const translation = new Vec2(5, 5);
+            body.translate(translation);
+            
+            expect(body.position).toEqual(new Vec2(5, 5));
+        });
+
+        it('should rotate body around its center', () => {
+            const angle = Math.PI / 4; // 45 degrees
+            body.rotate(angle);
+            
+            expect(body.angle).toBeCloseTo(angle, 6);
+        });
+
+        it('should not change position when rotating', () => {
+            const initialPosition = body.position.clone();
+            body.rotate(Math.PI / 4);
+            
+            expect(body.position).toEqual(initialPosition);
+        });
+
+        it('should set angle and position directly', () => {
+            body.setAngle(Math.PI / 2);
+            body.setPosition(new Vec2(10, 10));
+            body.setTransform(new Vec2(10, 10), Math.PI / 2);
+            
+            expect(body.angle).toBeCloseTo(Math.PI / 2, 6);
+            expect(body.position).toEqual(new Vec2(10, 10));
+
         });
     });
 });

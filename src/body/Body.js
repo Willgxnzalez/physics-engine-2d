@@ -36,11 +36,12 @@ export class Body {
         // Geometry and shape properties
         this.localVertices = new Vertices(vertices);
         this.vertices = null;
+        this.bounds = null;
         this.type = type;
         this.width = width;
         this.height = height;
         this.radius = radius;
-        this._updateWorldVertices();
+        this._updateWorldVerticesAndBounds();
         
         Object.assign(this, props);
 
@@ -51,7 +52,6 @@ export class Body {
         this.invMass = this.isStatic ? 0 : 1 / this.mass;
         this.invInertia = (this.isStatic || this.inertia === 0) ? 0 : 1 / this.inertia;
         
-        this.bounds = Bounds.fromVertices(this.vertices);
     }
 
     /**
@@ -84,6 +84,45 @@ export class Body {
         // Inertia scales with mass, so update it if it was computed
         this.inertia = this._computeInertia();
         this.invInertia = 1 / this.inertia;
+    }
+
+    /**
+     * Set the position of the body
+     * @param {*} x 
+     * @param {*} y 
+     */
+    setPosition(x, y) {
+        this.position.set(x, y);
+        this._updateWorldVerticesAndBounds();
+        this.bounds = Bounds.fromVertices(this.vertices);
+    }
+
+    /**
+     * Set the angle of the body
+     * @param {number} angle - Angle in radians
+     */
+    setAngle(angle) {
+        this.angle = angle;
+        this._updateWorldVerticesAndBounds();
+        this.bounds = Bounds.fromVertices(this.vertices);
+    }
+
+    /**
+     * Set both position and angle of the body
+     * @param {Vec2} position - New position vector
+     * @param {number} angle - New angle in radians
+     */
+    setTransform(position, angle) {
+        this.setPosition(position.x, position.y);
+        this.setAngle(angle);
+    }
+
+    rotate(angle) {
+        this.setAngle(this.angle + angle);
+    }
+    
+    translate(offset) {
+        this.setPosition(this.position.x + offset.x, this.position.y + offset.y);
     }
 
     /**
@@ -127,6 +166,7 @@ export class Body {
             if (this.radius == null) {
                 throw new Error("Circle body requires radius to compute inertia.");
             }
+            console.log('Circle mass:', this.mass, 'radius:', this.radius);
             return (this.mass / 2) * this.radius * this.radius;
         } else if (this.type === 'rectangle') {
             if (this.width == null || this.height == null) {
@@ -158,14 +198,15 @@ export class Body {
     }
 
     /**
-     * Update world vertices based on current position and angle
+     * Update world vertices and bounds based on current position and angle
      */
-    _updateWorldVertices() {
+    _updateWorldVerticesAndBounds() {
         this.vertices = this.localVertices.clone();
         if (this.angle !== 0) {
             this.vertices.rotateInPlace(this.angle);
         }
         this.vertices.translateInPlace(this.position);
+        this.bounds = Bounds.fromVertices(this.vertices);
     }
 
     update(dt) {
@@ -182,8 +223,7 @@ export class Body {
         this.position.translate(this.velocity.scale(dt));
 
         // Update world transform
-        this._updateWorldVertices();
-        this.bounds = Bounds.fromVertices(this.vertices);
+        this._updateWorldVerticesAndBounds();
 
         // Clear accumulated forces for next frame
         this.force.set(0, 0);
