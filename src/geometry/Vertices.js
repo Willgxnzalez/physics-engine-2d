@@ -10,19 +10,8 @@ export class Vertices {
         this._points = pointsArray.map(p => p instanceof Vec2 ? p : new Vec2(p.x, p.y));
     }
 
-    clone() {
-        return new Vertices(this._points.map(p => p.clone()));
-    }
-
     get length() {
         return this._points.length;
-    }
-
-    at(index) {
-        if (index < 0 || index >= this._points.length) {
-            throw new Error('Index out of bounds');
-        }
-        return this._points[index];
     }
 
     // Iterator
@@ -30,6 +19,13 @@ export class Vertices {
         for (const point of this._points) {
             yield point;
         }
+    }
+
+    at(index) {
+        if (index < 0 || index >= this._points.length) {
+            throw new Error('Index out of bounds');
+        }
+        return this._points[index];
     }
 
     // Immutable operations
@@ -60,5 +56,41 @@ export class Vertices {
             p.translate(offset);
         }
         return this;
+    }
+
+    area () {
+        if (this._points.length < 3) {
+            throw new Error('At least 3 points are required to calculate area');
+        }
+        
+        // Using the shoelace formula
+        // https://en.wikipedia.org/wiki/Shoelace_formula
+        let area = 0;
+        for (let i = 0; i < this._points.length; i++) {
+            const p0 = this._points[i];
+            const p1 = this._points[(i + 1) % this._points.length];
+            area += p0.x * p1.y - p1.x * p0.y;
+        }
+        return area / 2;
+    }
+
+    centroid () {
+        if (this._points.length < 3) {
+            throw new Error('At least 3 points are required to calculate centroid');
+        }
+
+        let cx = 0, cy = 0, area = this.area();
+        for (let i = 0; i < this._points.length; i++) {
+            const p0 = this._points[i];
+            const p1 = this._points[(i + 1) % this._points.length];
+            const factor = (p0.x * p1.y - p1.x * p0.y);
+            cx += (p0.x + p1.x) * factor;
+            cy += (p0.y + p1.y) * factor;
+        }
+        return new Vec2(cx / (6 * area), cy / (6 * area));
+    }
+
+    clone() {
+        return new Vertices(this._points.map(p => p.clone()));
     }
 }
