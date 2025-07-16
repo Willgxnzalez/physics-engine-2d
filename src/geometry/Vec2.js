@@ -24,6 +24,10 @@ export class Vec2 {
         return this.x * vec.x + this.y * vec.y;
     }
 
+    cross(vec) {
+        return this.x * vec.y - this.y * vec.x; // 2D cross product
+    }
+
     magnitude() {
         return Math.sqrt(this.x * this.x + this.y * this.y);
     }
