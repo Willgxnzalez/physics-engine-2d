@@ -14,13 +14,13 @@ export class Body {
         velocity = new Vec2(0, 0),
         angle = 0,
         angularVelocity = 0,
-        isStatic = false,
         mass = 1,
         inertia = null,
         width = null,
         height = null,
         radius = null,
         type = 'polygon',
+        isStatic = false,
         ...props
     } = {}) {
         // Motion properties
@@ -166,7 +166,6 @@ export class Body {
             if (this.radius == null) {
                 throw new Error("Circle body requires radius to compute inertia.");
             }
-            console.log('Circle mass:', this.mass, 'radius:', this.radius);
             return (this.mass / 2) * this.radius * this.radius;
         } else if (this.type === 'rectangle') {
             if (this.width == null || this.height == null) {
