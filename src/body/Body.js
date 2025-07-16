@@ -9,36 +9,81 @@ import { Bounds } from '../geometry/Bounds.js';
 
 export class Body {
     constructor({
+        vertices = [],
         position = new Vec2(0, 0),
         velocity = new Vec2(0, 0),
+        angle = 0,
+        angularVelocity = 0,
         isStatic = false,
         mass = 1,
-
-        vertices = []
+        inertia = null,
+        width = null,
+        height = null,
+        radius = null,
+        type = 'polygon',
+        ...props
     } = {}) {
-        // Motion
+        // Motion properties
         this.position = position.clone();
         this.velocity = velocity.clone();
-        this.angle = 0; // Rotation angle in radians
-        this.angularVelocity = 0; // Angular velocity in radians per second
+        this.angle = angle;
+        this.angularVelocity = angularVelocity;
 
-        // Forces and torques
-        this.force = new Vec2(0, 0); // Accumulated force per frame
-        this.torque = 0; // Scalar torque in 2D per frame
+        // Forces and torques (cleared each frame)
+        this.force = new Vec2(0, 0);
+        this.torque = 0;
 
-        // Physical properties
-        this.isStatic = !!isStatic;
-        this.mass = this.isStatic ? Infinity : mass;
-        this.invMass = this.isStatic ? 0 : 1 / mass;
-        this.inertia = this.isStatic ? Infinity : mass * 0.01;
-        this.invInertia = this.isStatic ? 0 : 1 / this.inertia
-
-        // Geometry
+        // Geometry and shape properties
         this.localVertices = new Vertices(vertices);
         this.vertices = null;
+        this.type = type;
+        this.width = width;
+        this.height = height;
+        this.radius = radius;
+        this._updateWorldVertices();
         
-        this.updateWorldVertices();
+        Object.assign(this, props);
+
+        // Physical properties
+        this.isStatic = isStatic;
+        this.mass = this.isStatic ? Infinity : mass;
+        this.inertia = this.isStatic ? Infinity : (inertia ?? this._computeInertia());
+        this.invMass = this.isStatic ? 0 : 1 / this.mass;
+        this.invInertia = (this.isStatic || this.inertia === 0) ? 0 : 1 / this.inertia;
+        
         this.bounds = Bounds.fromVertices(this.vertices);
+    }
+
+    /**
+     * Make body static or dynamic
+     * @param {boolean} value - Whether body should be static
+     */
+    setStatic(value) {
+        this.isStatic = !!value;
+        if (this.isStatic) {
+            this.mass = Infinity;
+            this.inertia = Infinity;
+            this.invMass = 0;
+            this.invInertia = 0;
+            this.velocity.set(0, 0);
+            this.angularVelocity = 0;
+        } else {
+            // Need to restore computed values - requires original mass/inertia
+            throw new Error('Converting static body to dynamic requires specifying mass');
+        }
+    }
+
+    /**
+     * Set mass and update derived properties
+     * @param {number} value - New mass value
+     */
+    setMass(value) {
+        if (this.isStatic) return;
+        this.mass = value;
+        this.invMass = 1 / value;
+        // Inertia scales with mass, so update it if it was computed
+        this.inertia = this._computeInertia();
+        this.invInertia = 1 / this.inertia;
     }
 
     /**
@@ -52,8 +97,8 @@ export class Body {
 
     /**
      * Applies a force at a specific point on body (world space), causing torque.
-     * @param {Vec2} point - World space point
      * @param {Vec2} force - Force vector
+     * @param {Vec2} point - World space point
      */
     applyForceAtPoint(force, point) {
         if (this.isStatic) return;
@@ -64,31 +109,84 @@ export class Body {
         this.torque += r.cross(force);
     }
 
-    updateWorldVertices() {
+    /**
+     * Apply torque directly to the body
+     * @param {number} torque - Torque to apply
+     */
+    applyTorque(torque) {
+        if (this.isStatic) return;
+        this.torque += torque;
+    }
+
+    /**
+     * Compute the moment of inertia for this body
+     * @private
+     */
+    _computeInertia() {
+        if (this.type === 'circle') {
+            if (this.radius == null) {
+                throw new Error("Circle body requires radius to compute inertia.");
+            }
+            return (this.mass / 2) * this.radius * this.radius;
+        } else if (this.type === 'rectangle') {
+            if (this.width == null || this.height == null) {
+                throw new Error("Rectangle body requires width and height to compute inertia.");
+            }
+            return (this.mass / 12) * (this.width * this.width + this.height * this.height);
+        } else {
+            if (this.localVertices.length < 3) {
+                return this.mass * 0.01; // Fallback for invalid polygons
+            }
+
+            let numerator = 0;
+            let denominator = 0;
+
+            for (let i = 0; i < this.localVertices.length; i++) {
+                const p0 = this.localVertices.at(i);
+                const p1 = this.localVertices.at((i + 1) % this.localVertices.length);
+
+                const cross = Math.abs(p0.cross(p1));
+                const term = (p0.x * p0.x + p0.x * p1.x + p1.x * p1.x +
+                            p0.y * p0.y + p0.y * p1.y + p1.y * p1.y);
+
+                numerator += cross * term;
+                denominator += cross;
+            }
+
+            return denominator > 0 ? (this.mass / 6) * (numerator / denominator) : this.mass * 0.01;
+        }   
+    }
+
+    /**
+     * Update world vertices based on current position and angle
+     */
+    _updateWorldVertices() {
         this.vertices = this.localVertices.clone();
-        this.vertices.rotateInPlace(this.angle);
+        if (this.angle !== 0) {
+            this.vertices.rotateInPlace(this.angle);
+        }
         this.vertices.translateInPlace(this.position);
     }
 
     update(dt) {
         if (this.isStatic) return;
 
-        this.angularVelocity += this.torque * this.invInertia * dt; // Update angular velocity
+        // Angular integration
+        this.angularVelocity += this.torque * this.invInertia * dt;
         this.angle += this.angularVelocity * dt;
-        this.angle = (this.angle + 2 * Math.PI) % (2 * Math.PI); // Normalize angle to [0, 2π)
+        this.angle = (this.angle + 2 * Math.PI) % (2 * Math.PI); // Normalize angle in [0, 2π)
 
-        // Semi-Implicit Euler integration
-        // Calculate acceleration from accumulated forces (F = ma, so a = F/m)
+        // Linear integration (Semi-Implicit Euler)
         const acceleration = this.force.scale(this.invMass);
-        this.velocity.translate(acceleration.scale(dt)); // Update velocity first: v = v + a * dt
-        this.position.translate(this.velocity.scale(dt));  // Then update position: p = p + v * dt
+        this.velocity.translate(acceleration.scale(dt));
+        this.position.translate(this.velocity.scale(dt));
 
         // Update world transform
-        this.updateWorldVertices();
+        this._updateWorldVertices();
         this.bounds = Bounds.fromVertices(this.vertices);
 
         // Clear accumulated forces for next frame
-        this.force = new Vec2(0, 0);
+        this.force.set(0, 0);
         this.torque = 0;
     }
 }

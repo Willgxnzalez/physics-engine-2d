@@ -42,4 +42,50 @@ describe('Vertices', () => {
     expect(Math.abs(rotated.at(0).x)).toBeLessThan(1e-6);
     expect(Math.abs(rotated.at(0).y - 1)).toBeLessThan(1e-6);
   });
+
+  it('iterates over vertices', () => {
+    const verts = new Vertices([
+      { x: 0, y: 0 },
+      { x: 1, y: 1 }
+    ]);
+
+    const points = [];
+    for (const point of verts) {
+      points.push(point);
+    }
+
+    expect(points.length).toBe(2);
+    expect(points[0].x).toBe(0);
+    expect(points[1].y).toBe(1);
+  });
+
+  it('computes area of different shapes', () => {
+    const triangle = new Vertices([
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 0, y: 1 }
+    ]);
+
+    const square = new Vertices([
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 }
+    ]);
+
+    expect(triangle.area()).toBeCloseTo(0.5);
+    expect(square.area()).toBeCloseTo(1);
+  });
+
+  it('computes centroid of a triangle', () => {
+    const triangle = new Vertices([
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 0, y: 1 }
+    ]);
+
+    const centroid = triangle.centroid();
+    expect(centroid.x).toBeCloseTo(1 / 3);
+    expect(centroid.y).toBeCloseTo(1 / 3);
+  });
 });
