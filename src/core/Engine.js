@@ -7,7 +7,8 @@ export class Engine {
     this.gravityStrength = 100;
     this.gravityDirection = new Vec2(0, 1); // Downward unit vector
     this.forces = [];
-    
+
+    this.paused = false;
 
     this.gravityForce = (body) => {
       if (this.gravityEnabled && !body.isStatic) 
@@ -32,6 +33,18 @@ export class Engine {
     }
   }
 
+  pause() {
+    this.paused = true;
+  }
+
+  isPaused() {
+    return this.paused;
+  }
+
+  resume() {
+    this.paused = false;
+  }
+
   enableGravity() {
     this.gravityEnabled = true;
   }
@@ -49,6 +62,8 @@ export class Engine {
   }
 
   update(dt) {
+    if (this.paused) return;
+
     for (const forceFunction of this.forces) {
       for (const body of this.bodies) {
         const force = forceFunction(body);
