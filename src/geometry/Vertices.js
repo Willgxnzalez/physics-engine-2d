@@ -90,6 +90,31 @@ export class Vertices {
         return new Vec2(cx / (6 * area), cy / (6 * area));
     }
 
+    /**
+     * Compute edge normals to be used as axes for SAT collision detection
+     * @returns {Vec2[]} Array of edge normals
+     */
+    normals() {
+        const normals = [];
+        for (let i = 0; i < this._points.length; i++) {
+            const p0 = this._points[i];
+            const p1 = this._points[(i+1) % this._points.length];
+            const normal = new Vec2(p1.y - p0.y, p0.x - p1.x).normalize();
+            normals.push(normal);
+        }
+        return normals;
+    }
+
+    project(axis) {
+        let min = Infinity, max = -Infinity;
+        for (const vertex of this._points) {
+            const project = vertex.dot(axis);
+            min = Math.min(min, project);
+            max = Math.max(max, project);
+        }
+        return { min, max };
+    }
+
     clone() {
         return new Vertices(this._points.map(p => p.clone()));
     }
