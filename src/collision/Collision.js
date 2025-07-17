@@ -6,7 +6,8 @@ export class Collision {
         let overlap = Infinity;
         let minAxis = null;
         let minAxisIndex = null;
-
+        
+        const manifold = new Manifold(A, B);
         const axes = [...A.vertices.normals(), ...B.vertices.normals()];
 
         for (let i = 0; i < axes.length; i++) {
@@ -16,7 +17,7 @@ export class Collision {
 
             const o = Math.min(projA.max, projB.max) - Math.max(projA.min, projB.min);
             if (o <= 0) {
-                return null; // No collision
+                return manifold; // No collision
             }
 
             if (o < overlap) {
@@ -34,7 +35,6 @@ export class Collision {
         const incidentBody = minAxisIndex < A.vertices.length ? B : A;
 
 
-        const manifold = new Manifold(A, B);
         manifold.normal = minAxis;
         manifold.penetration = overlap;
         manifold.contacts = [A.position, B.position];

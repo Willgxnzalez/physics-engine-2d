@@ -20,7 +20,7 @@ export class Detector {
 
                 // Narrow phase: SAT collision detection
                 const manifold = Collision.PolygonVsPolygon(bodyA, bodyB);
-                if (manifold && manifold.isValid()) {
+                if (manifold.isValid()) {
                     contacts.push(manifold);
                 }
             }
