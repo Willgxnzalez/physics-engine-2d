@@ -8,12 +8,18 @@ export class Vec2 {
         this.y = y;
     }
 
+    // Core operations
     set(x, y) {
         this.x = x;
         this.y = y;
         return this; 
     } 
 
+    clone() {
+        return new Vec2(this.x, this.y);
+    }
+
+    // Arithmetic operations
     add(vec) {
         return new Vec2(this.x + vec.x, this.y + vec.y);
     }
@@ -26,6 +32,11 @@ export class Vec2 {
         return new Vec2(this.x * scalar, this.y * scalar);
     }
 
+    negate() {
+        return new Vec2(-this.x, -this.y);
+    }
+
+    // Geometric operations
     dot(vec) {
         return this.x * vec.x + this.y * vec.y;
     }
@@ -44,7 +55,11 @@ export class Vec2 {
         return new Vec2(this.x / mag, this.y / mag);
     }
 
-    // Unified rotation: rotates around origin or specified point
+    perpendicular() {
+        return new Vec2(-this.y, this.x);
+    }
+
+    // Transformations
     rotate(angle, point = null) {
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
@@ -67,9 +82,5 @@ export class Vec2 {
         this.x += offset.x;
         this.y += offset.y;
         return this;
-    }
-
-    clone() {
-        return new Vec2(this.x, this.y);
     }
 }
