@@ -43,7 +43,7 @@ export class Body {
         this.radius = radius;
         this._updateWorldVerticesAndBounds();
         
-        Object.assign(this, props);
+        Object.assign(this, props); // allow custom properties
 
         // Physical properties
         this.isStatic = isStatic;

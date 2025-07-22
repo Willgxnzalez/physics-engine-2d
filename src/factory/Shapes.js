@@ -39,6 +39,7 @@ export class Shapes {
         }
 
         const verts = [];
+        // Counter-clockwise order
         for (let i = 0; i < segments; i++) {
             const angle = (i / segments) * Math.PI * 2;
             verts.push(new Vec2(Math.cos(angle) * radius, Math.sin(angle) * radius));

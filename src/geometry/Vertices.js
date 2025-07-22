@@ -10,6 +10,10 @@ export class Vertices {
         this._points = pointsArray.map(p => p instanceof Vec2 ? p : new Vec2(p.x, p.y));
     }
 
+    get points() {
+        return this._points.map(p => p.clone());
+    }
+    
     get length() {
         return this._points.length;
     }
@@ -105,6 +109,11 @@ export class Vertices {
         return normals;
     }
 
+    /**
+     * Project the vertices onto an axis
+     * @param {Vec2} axis - The axis to project onto
+     * @returns {{min: number, max: number}} The minimum and maximum values of the projection
+     */
     project(axis) {
         let min = Infinity, max = -Infinity;
         for (const vertex of this._points) {
