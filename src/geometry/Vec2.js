@@ -59,6 +59,17 @@ export class Vec2 {
         return new Vec2(-this.y, this.x);
     }
 
+    /**
+     * Returns the Euclidean distance between this vector and another vector
+     * @param {Vec2} vec
+     * @returns {number}
+     */
+    distanceTo(vec) {
+        const dx = this.x - vec.x;
+        const dy = this.y - vec.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
     // Transformations
     rotate(angle, point = null) {
         const cos = Math.cos(angle);
