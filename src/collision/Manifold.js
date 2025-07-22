@@ -6,7 +6,7 @@ export class Manifold {
     constructor(bodyA, bodyB) {
         this.bodyA = bodyA;
         this.bodyB = bodyB;
-        this.normal = new Vec2(0, 0);        // Direction of collision resolution (from A to B) pointing from reference to incident
+        this.normal = new Vec2(0, 0);        // Direction of collision resolution (from A to B) pointing from reference to incident body
         this.penetration = 0;                // Penetration depth
         this.contacts = [];
     }
@@ -17,5 +17,13 @@ export class Manifold {
      */
     isValid() {
         return this.contacts.length > 0 && this.penetration > 0;
+    }
+
+    /**
+     * Get the minimum translation vector
+     * @returns {Vec2} The minimum translation vector
+     */
+    mtv() {
+        return this.normal.scale(this.penetration)
     }
 }
