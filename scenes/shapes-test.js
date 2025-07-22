@@ -34,11 +34,11 @@ export class ShapesTestDemo {
     }
 
     createRectangleTests() {
-        // Spread rectangles horizontally, smaller sizes
+        // Spread rectangles horizontally, alternate sizes
         this.smallRect = Shapes.Rect(80, 70, 30, 30, { mass: 1 });
-        this.mediumRect = Shapes.Rect(150, 70, 40, 40, { mass: 2 });
+        this.mediumRect = Shapes.Rect(150, 70, 60, 60, { mass: 2 }); // larger
         this.largeRect = Shapes.Rect(230, 70, 60, 30, { mass: 3 });
-        this.tallRect = Shapes.Rect(310, 70, 25, 60, { mass: 2 });
+        this.tallRect = Shapes.Rect(310, 70, 45, 100, { mass: 2 }); // larger
 
         this.engine.addBody(this.smallRect);
         this.engine.addBody(this.mediumRect);
@@ -47,11 +47,11 @@ export class ShapesTestDemo {
     }
 
     createCircleTests() {
-        // Spread circles horizontally, smaller radii
+        // Spread circles horizontally, alternate radii
         this.smallCircle = Shapes.Circle(400, 70, 18, { mass: 1 });
-        this.mediumCircle = Shapes.Circle(470, 70, 28, { mass: 2 });
+        this.mediumCircle = Shapes.Circle(470, 70, 48, { mass: 2 }); // larger
         this.largeCircle = Shapes.Circle(540, 70, 36, { mass: 3 });
-        this.highSegments = Shapes.Circle(570, 140, 22, { mass: 1, segments: 32 });
+        this.highSegments = Shapes.Circle(570, 140, 44, { mass: 1, segments: 32 }); // larger
 
         this.engine.addBody(this.smallCircle);
         this.engine.addBody(this.mediumCircle);
@@ -60,11 +60,11 @@ export class ShapesTestDemo {
     }
 
     createPolygonTests() {
-        // Spread polygons horizontally, smaller radii
+        // Spread polygons horizontally, alternate radii
         this.triangle = Shapes.Circle(80, 200, 28, { mass: 1, segments: 3 });
-        this.square = Shapes.Circle(150, 200, 28, { mass: 1, segments: 4 });
+        this.square = Shapes.Circle(150, 200, 48, { mass: 1, segments: 4 }); // larger
         this.pentagon = Shapes.Circle(220, 200, 28, { mass: 1, segments: 5 });
-        this.hexagon = Shapes.Circle(290, 200, 28, { mass: 1, segments: 6 });
+        this.hexagon = Shapes.Circle(290, 200, 48, { mass: 1, segments: 6 }); // larger
         this.octagon = Shapes.Circle(360, 200, 28, { mass: 1, segments: 8 });
 
         this.engine.addBody(this.triangle);
@@ -75,10 +75,10 @@ export class ShapesTestDemo {
     }
 
     createMixedShapes() {
-        // Mixed shapes, spaced out
-        this.mixedRect = Shapes.Rect(440, 200, 40, 40, { mass: 2 });
+        // Mixed shapes, alternate sizes
+        this.mixedRect = Shapes.Rect(440, 200, 80, 80, { mass: 2 }); // larger
         this.mixedCircle = Shapes.Circle(510, 200, 24, { mass: 2 });
-        this.mixedPoly = Shapes.Circle(580, 200, 28, { mass: 2, segments: 7 });
+        this.mixedPoly = Shapes.Circle(580, 200, 48, { mass: 2, segments: 7 }); // larger
 
         this.mixedRect.angularVelocity = 2;
         this.mixedCircle.angularVelocity = -1;
