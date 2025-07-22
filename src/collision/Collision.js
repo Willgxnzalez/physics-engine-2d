@@ -52,13 +52,15 @@ export class Collision {
      */
     static findContactPoints(referenceVertices, incidentVertices) {
         let outputVertices = incidentVertices.points;
+        const edgeNormals = referenceVertices.normals();
 
-        let referenceNormals = referenceVertices.normals();
-
+        // Clip against each edge of the reference polygon
         for (let i = 0; i < referenceVertices.length; i++) {
-            const currentVertex = referenceVertices.at(i);
+            const edgeStart = referenceVertices.at(i);
+            const edgeEnd = referenceVertices.at((i + 1) % referenceVertices.length);
+            const edgeNormal = edgeNormals[i];
             
-            outputVertices = this.clipAgainstEdge(outputVertices, currentVertex, referenceNormals[i]);
+            outputVertices = this.clipAgainstEdge(outputVertices, edgeStart, edgeEnd, edgeNormal);
             
             if (outputVertices.length === 0) {
                 break;  
@@ -71,45 +73,57 @@ export class Collision {
     /**
      * Clip a polygon against a single edge
      * @param {Array<Vec2>} vertices - Vertices to clip
-     * @param {Vec2} edgePoint - A point on the clipping edge
-     * @param {Vec2} edgeNormal - Normal of the clipping edge (pointing outward)
-     * @returns {Array<Vec2>} Clipped verticesw
+     * @param {Vec2} edgeStart - Start point of the clipping edge
+     * @param {Vec2} edgeEnd - End point of the clipping edge
+     * @param {Vec2} edgeNormal - Normal of the clipping edge (pointing inward to the polygon)
+     * @returns {Array<Vec2>} Clipped vertices
      */
-    static clipAgainstEdge(vertices, edgePoint, edgeNormal) {
+    static clipAgainstEdge(vertices, edgeStart, edgeEnd, edgeNormal) {
+        if (vertices.length === 0) return [];
+        
         const output = [];
         
         for (let i = 0; i < vertices.length; i++) {
             const currentVertex = vertices[i];
             const previousVertex = vertices[(i - 1 + vertices.length) % vertices.length];
             
-            // Calculate signed distance from edge
-            const currentDistance = edgeNormal.dot(currentVertex.sub(edgePoint));
-            const previousDistance = edgeNormal.dot(previousVertex.sub(edgePoint));
+            // Calculate signed distance from edge (negative means inside)
+            const currentDistance = edgeNormal.dot(currentVertex.sub(edgeStart));
+            const previousDistance = edgeNormal.dot(previousVertex.sub(edgeStart));
             
-            const inside = d => d <= 0;
+            const isCurrentInside = currentDistance <= 0;
+            const isPreviousInside = previousDistance <= 0;
 
-            if (inside(currentDistance)) {
-                if (!inside(previousDistance)) {
+            if (isCurrentInside) {
+                // Current vertex is inside
+                if (!isPreviousInside) {
+                    // Previous was outside, current is inside - add intersection
                     const intersection = this.lineIntersection(
                         previousVertex,
                         currentVertex,
-                        edgePoint,
-                        edgePoint.add(edgeNormal.perpendicular())
+                        edgeStart,
+                        edgeEnd
                     );
-                    if (intersection) output.push(intersection);
+                    if (intersection) {
+                        output.push(intersection);
+                    }
                 }
+                // Add current vertex
                 output.push(currentVertex);
-            } else if (inside(previousDistance)) {
+            } else if (isPreviousInside) {
+                // Previous was inside, current is outside - add intersection only
                 const intersection = this.lineIntersection(
                     previousVertex,
                     currentVertex,
-                    edgePoint,
-                    edgePoint.add(edgeNormal.perpendicular())
+                    edgeStart,
+                    edgeEnd
                 );
-                if (intersection) output.push(intersection);
+                if (intersection) {
+                    output.push(intersection);
+                }
             }
+            // If both are outside, add nothing
         }
-        
         return output;
     }
 
@@ -124,21 +138,15 @@ export class Collision {
     static lineIntersection(p1, p2, p3, p4) {
         const denom = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
         
-        if (Math.abs(denom) < 1e-10) {
-            return null; // Lines are parallel
-        }
+        if (Math.abs(denom) < 1e-10) return null; // Lines are parallel
         
         const ua = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denom;
-        const ub = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denom;
         
-        // Check if intersection is within both line segments
-        if (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1) {
-            return new Vec2(
-                p1.x + ua * (p2.x - p1.x),
-                p1.y + ua * (p2.y - p1.y)
-            );
-        }
-        
-        return null;
+        // For clipping, we want the intersection point along the infinite lines
+        // The clipping edge is finite, but the polygon edge being clipped can extend beyond
+        return new Vec2(
+            p1.x + ua * (p2.x - p1.x),
+            p1.y + ua * (p2.y - p1.y)
+        );
     }
 }

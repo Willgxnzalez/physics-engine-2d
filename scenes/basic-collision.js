@@ -26,10 +26,32 @@ export class BasicCollisionDemo {
         this.box2 = Shapes.Rect(250, 100, 50, 50, { mass: 1 });
         this.circle = Shapes.Circle(400, 50, 80, { mass: 2 });
 
+        // Stack of three boxes
+        this.stackBox1 = Shapes.Rect(600, HEIGHT - 170, 60, 60, { mass: 1 });
+        this.stackBox2 = Shapes.Rect(600, HEIGHT - 240, 60, 60, { mass: 1 });
+        this.stackBox3 = Shapes.Rect(600, HEIGHT - 310, 60, 60, { mass: 1 });
+
+        // Row of circles
+        this.circle1 = Shapes.Circle(100, 300, 30, { mass: 1 });
+        this.circle2 = Shapes.Circle(170, 300, 30, { mass: 1 });
+        this.circle3 = Shapes.Circle(240, 300, 30, { mass: 1 });
+
+        // Polygon (triangle) colliding with a box
+        this.triangle = Shapes.Circle(350, 200, 40, { mass: 1, segments: 3 });
+        this.targetBox = Shapes.Rect(350, 350, 80, 40, { mass: 2 });
+
         this.engine.addBody(this.ground);
         this.engine.addBody(this.box1);
         this.engine.addBody(this.box2);
         this.engine.addBody(this.circle);
+        this.engine.addBody(this.stackBox1);
+        this.engine.addBody(this.stackBox2);
+        this.engine.addBody(this.stackBox3);
+        this.engine.addBody(this.circle1);
+        this.engine.addBody(this.circle2);
+        this.engine.addBody(this.circle3);
+        this.engine.addBody(this.triangle);
+        this.engine.addBody(this.targetBox);
 
         this.engine.setGravityStrength(50);
     }
@@ -50,6 +72,32 @@ export class BasicCollisionDemo {
                 this.debugMode = !this.debugMode;
                 console.log(this.debugMode ? 'Debug ON' : 'Debug OFF');
             }
+            if (event.code === 'KeyR') {
+                this.reset();
+                console.log('Reset');
+            }
+        });
+    }
+
+    reset() {
+        const HEIGHT = this.canvas.height;
+
+        this.box1.position.set(200, 100);
+        this.box2.position.set(250, 100);
+        this.circle.position.set(400, 50);
+        this.stackBox1.position.set(600, HEIGHT - 170);
+        this.stackBox2.position.set(600, HEIGHT - 240);
+        this.stackBox3.position.set(600, HEIGHT - 310);
+        this.circle1.position.set(100, 300);
+        this.circle2.position.set(170, 300);
+        this.circle3.position.set(240, 300);
+        this.triangle.position.set(350, 200);
+        this.targetBox.position.set(350, 350);
+
+        this.engine.bodies.forEach(body => {
+            body.velocity.set(0, 0);
+            body.angularVelocity = 0;
+            body.rotation = 0;
         });
     }
 
@@ -93,6 +141,19 @@ export class BasicCollisionDemo {
                 this.ctx.beginPath();
                 this.ctx.arc(contactPoint.x, contactPoint.y, 4, 0, 2 * Math.PI);
                 this.ctx.fill();
+            }
+
+            if (contact.contacts.length > 2) {
+                this.ctx.save();
+                this.ctx.beginPath();
+                this.ctx.moveTo(contact.contacts[0].x, contact.contacts[0].y);
+                for (let i = 1; i < contact.contacts.length; i++) {
+                    this.ctx.lineTo(contact.contacts[i].x, contact.contacts[i].y);
+                }
+                this.ctx.closePath();
+                this.ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
+                this.ctx.fill();
+                this.ctx.restore();
             }
         }
     }
