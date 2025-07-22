@@ -1,5 +1,19 @@
-import { ShapesTestDemo } from './scenes/shapes/shapes-test.js';
+import { ShapesTestDemo } from './scenes/shapes-test.js';
+import { RotationTestDemo } from './scenes/rotation-test.js';
+import { BasicCollisionDemo } from './scenes/basic-collision.js';
 
 const canvas = document.getElementById('canvas');
-const demo = new ShapesTestDemo(canvas);
+
+// Choose which demo to run
+const DEMO_TYPE = 'rotation'; // Change to 'shapes' or 'rotation'
+
+let demo;
+if (DEMO_TYPE === 'rotation') {
+    demo = new RotationTestDemo(canvas);
+} else if (DEMO_TYPE === 'shapes') {
+    demo = new ShapesTestDemo(canvas);
+} else {
+    demo = new BasicCollisionDemo(canvas);
+}
+
 demo.run();

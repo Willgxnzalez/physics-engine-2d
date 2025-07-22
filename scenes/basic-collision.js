@@ -21,7 +21,7 @@ export class BasicCollisionDemo {
         const HEIGHT = this.canvas.height;
 
         // Create bodies for collision testing
-        this.ground = Shapes.Rect(WIDTH/2, HEIGHT - 25, WIDTH, 50, { isStatic: true });
+        this.ground = Shapes.Rect(WIDTH/2, HEIGHT - 100, WIDTH, 50, { isStatic: true });
         this.box1 = Shapes.Rect(200, 100, 100, 100, { mass: 1 });
         this.box2 = Shapes.Rect(250, 100, 50, 50, { mass: 1 });
         this.circle = Shapes.Circle(400, 50, 80, { mass: 2 });
@@ -75,8 +75,8 @@ export class BasicCollisionDemo {
     }
 
     renderDebugInfo(contacts) {
-        this.ctx.fillStyle = '#ffff00';
-        this.ctx.strokeStyle = '#00ff00';
+        this.ctx.fillStyle = '#00ffff';
+        this.ctx.strokeStyle = '#00ffff';
         this.ctx.lineWidth = 2;
         
         for (const contact of contacts) {
