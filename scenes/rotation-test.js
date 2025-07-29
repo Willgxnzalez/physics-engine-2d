@@ -158,11 +158,17 @@ export class RotationTestDemo {
         this.orbit1.velocity.set(30, 0);
         this.orbit2.velocity.set(25, 0);
         this.orbit3.velocity.set(0, 20);
+        this.orbit1.angularVelocity = 0;
+        this.orbit2.angularVelocity = 0;
+        this.orbit3.angularVelocity = 0;
 
         // Reset pendulum motion
         this.pendulum1.setPosition(400, 150);
         this.pendulum2.setPosition(400, 200);
         this.pendulum3.setPosition(400, 250);
+        this.pendulum1.velocity.set(0, 0);
+        this.pendulum2.velocity.set(0, 0);
+        this.pendulum3.velocity.set(0, 0);
         this.pendulum1.angularVelocity = 0.5;
         this.pendulum2.angularVelocity = -0.3;
         this.pendulum3.angularVelocity = 0.7;
@@ -171,6 +177,9 @@ export class RotationTestDemo {
         this.rotatingRect.setPosition(600, 150);
         this.rotatingCircle.setPosition(650, 200);
         this.rotatingPoly.setPosition(600, 250);
+        this.rotatingRect.velocity.set(0, 0);
+        this.rotatingCircle.velocity.set(0, 0);
+        this.rotatingPoly.velocity.set(0, 0);
         this.rotatingRect.angularVelocity = 1.2;
         this.rotatingCircle.angularVelocity = -0.8;
         this.rotatingPoly.angularVelocity = 0.6;
@@ -179,6 +188,9 @@ export class RotationTestDemo {
         this.spinningRect.setPosition(100, 350);
         this.spinningCircle.setPosition(200, 350);
         this.spinningTriangle.setPosition(300, 350);
+        this.spinningRect.velocity.set(0, 0);
+        this.spinningCircle.velocity.set(0, 0);
+        this.spinningTriangle.velocity.set(0, 0);
         this.spinningRect.angularVelocity = 3.0;
         this.spinningCircle.angularVelocity = -2.5;
         this.spinningTriangle.angularVelocity = 4.0;
@@ -188,6 +200,8 @@ export class RotationTestDemo {
         this.constrainedCircle.setPosition(530, 350);
         this.constrainedRect.velocity.set(0, 0);
         this.constrainedCircle.velocity.set(0, 0);
+        this.constrainedRect.angularVelocity = 0;
+        this.constrainedCircle.angularVelocity = 0;
     }
 
     toggleRotationSpeeds() {
