@@ -3,12 +3,12 @@ import { Vec2 } from '../geometry/Vec2.js';
  * Manifold class for storing collision information between two bodies.
  */
 export class Manifold {
-    constructor(bodyA, bodyB) {
-        this.bodyA = bodyA;
-        this.bodyB = bodyB;
+    constructor(referenceBody, incidentBody) {
+        this.referenceBody = referenceBody; // Reference body
+        this.incidentBody = incidentBody; // Incident body
         this.normal = new Vec2(0, 0);        // Direction of collision resolution (from A to B) pointing from reference to incident body
         this.penetration = 0;                // Penetration depth
-        this._contacts = [];
+        this._contacts = [];                 // Contact points
     }
 
     /**
@@ -38,57 +38,39 @@ export class Manifold {
         return this._getDeepestContacts();
     }
 
-    /**
-     * Get the deepest contact points for collision resolution
-     * @returns {Array<Vec2>} The deepest contact points (max 2 for stability)
-     */
     _getDeepestContacts() {
         if (this._contacts.length === 0) return [];
         if (this._contacts.length <= 2) return this._contacts;
-
-        // Calculate penetration depth for each contact point
-        const contactsWithDepth = this._contacts.map(contact => {
-            // Project contact point onto the collision normal
-            // Depth is how far the contact point is past the reference body's edge
-            const depth = this._calculateContactDepth(contact);
-            return { point: contact, depth: depth };
-        });
-
-        // Sort by depth (deepest first)
-        contactsWithDepth.sort((a, b) => b.depth - a.depth);
-
-        // For stability, we want at most 2 contact points
-        // If we have more than 2 contacts at the same depth, choose the ones furthest apart
-        if (contactsWithDepth.length === 1) {
-            return [contactsWithDepth[0].point];
-        }
-
-        // Find all contacts at maximum depth (within a small tolerance)
-        const maxDepth = contactsWithDepth[0].depth;
+    
+        const contactsWithDepth = this._contacts.map(p => ({
+            point: p,
+            depth: this._calculateContactDepth(p)
+        }));
+        
+        // Find the deepest contact
+        const maxDepth = Math.max(...contactsWithDepth.map(c => c.depth));
         const tolerance = 0.01;
-        const deepestContacts = contactsWithDepth.filter(c => 
-            Math.abs(c.depth - maxDepth) < tolerance
-        );
-
-        if (deepestContacts.length <= 2) {
-            return deepestContacts.map(c => c.point);
-        }
-
-        // If we have more than 2 contacts at the same depth, 
-        // choose the two that are furthest apart
-        return this._selectFarthestContacts(deepestContacts.map(c => c.point));
+    
+        // Filter to contacts within tolerance of max depth
+        const deepest = contactsWithDepth
+            .filter(c => Math.abs(c.depth - maxDepth) < tolerance)
+            .map(c => c.point);
+    
+        if (deepest.length <= 2) return deepest;
+    
+        return this._selectFarthestContacts(deepest);
     }
-
+    
     /**
      * Calculate the penetration depth of a contact point
      * @param {Vec2} contactPoint - The contact point
      * @returns {number} The penetration depth
      */
     _calculateContactDepth(contactPoint) {
-        // Find the supporting edge/vertex of the reference body along the normal
+        // Project contact point onto the collision normal
         let minDistance = Infinity;
-        for (let i = 0; i < this.bodyA.vertices.length; i++) {
-            const vertex = this.bodyA.vertices.at(i);
+        for (let i = 0; i < this.referenceBody.vertices.length; i++) {
+            const vertex = this.referenceBody.vertices.at(i);
             const distance = this.normal.dot(contactPoint.sub(vertex));
             minDistance = Math.min(minDistance, distance);
         }
@@ -113,6 +95,6 @@ export class Manifold {
                 }
             }
         }
-        return farthestPair;
+        return farthestPair;  
     }
 }

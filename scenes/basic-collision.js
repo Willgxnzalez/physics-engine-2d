@@ -24,7 +24,7 @@ export class BasicCollisionDemo {
 
         this.box1 = Shapes.Rect(200, 100, 50, 50, { mass: 1 });
         this.box2 = Shapes.Rect(250, 100, 200, 200, { mass: 1 });
-
+    
         this.circle1 = Shapes.Circle(400, 50, 120, { mass: 2 });
         this.circle2 = Shapes.Circle(100, 300, 70, { mass: 1 });
 
@@ -118,7 +118,7 @@ export class BasicCollisionDemo {
 
             // Draw collision normals
             const normalSize = 30;
-            const normalStart = contact.bodyA.position;
+            const normalStart = contact.referenceBody.position;
             const normalEnd = normalStart.add(contact.normal.scale(normalSize));
             this.ctx.beginPath();
             this.ctx.moveTo(normalStart.x, normalStart.y);
@@ -126,7 +126,13 @@ export class BasicCollisionDemo {
             this.ctx.stroke();
             
             // Draw contact points
-            for (const contactPoint of contact.contacts) {
+            // for (const contactPoint of contact.contacts) {
+            //     this.ctx.beginPath();
+            //     this.ctx.arc(contactPoint.x, contactPoint.y, 4, 0, 2 * Math.PI);
+            //     this.ctx.fill();
+            // }
+
+            for (const contactPoint of contact.deepestContacts) {
                 this.ctx.beginPath();
                 this.ctx.arc(contactPoint.x, contactPoint.y, 4, 0, 2 * Math.PI);
                 this.ctx.fill();

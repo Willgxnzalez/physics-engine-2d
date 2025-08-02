@@ -62,9 +62,7 @@ export class Collision {
             
             outputVertices = this.clipAgainstEdge(outputVertices, edgeStart, edgeEnd, edgeNormal);
             
-            if (outputVertices.length === 0) {
-                break;  
-            }
+            if (outputVertices.length === 0) break;  
         }
         
         return outputVertices;
@@ -80,50 +78,41 @@ export class Collision {
      */
     static clipAgainstEdge(vertices, edgeStart, edgeEnd, edgeNormal) {
         if (vertices.length === 0) return [];
-        
+
         const output = [];
-        
+
         for (let i = 0; i < vertices.length; i++) {
             const currentVertex = vertices[i];
             const previousVertex = vertices[(i - 1 + vertices.length) % vertices.length];
-            
-            // Calculate signed distance from edge (negative means inside)
+
             const currentDistance = edgeNormal.dot(currentVertex.sub(edgeStart));
             const previousDistance = edgeNormal.dot(previousVertex.sub(edgeStart));
-            
+
             const isCurrentInside = currentDistance <= 0;
             const isPreviousInside = previousDistance <= 0;
 
             if (isCurrentInside) {
-                // Current vertex is inside
                 if (!isPreviousInside) {
-                    // Previous was outside, current is inside - add intersection
                     const intersection = this.lineIntersection(
                         previousVertex,
                         currentVertex,
                         edgeStart,
                         edgeEnd
                     );
-                    if (intersection) {
-                        output.push(intersection);
-                    }
+                    if (intersection) output.push(intersection);
                 }
-                // Add current vertex
                 output.push(currentVertex);
             } else if (isPreviousInside) {
-                // Previous was inside, current is outside - add intersection only
                 const intersection = this.lineIntersection(
                     previousVertex,
                     currentVertex,
                     edgeStart,
                     edgeEnd
                 );
-                if (intersection) {
-                    output.push(intersection);
-                }
+                if (intersection) output.push(intersection);
             }
-            // If both are outside, add nothing
         }
+
         return output;
     }
 
