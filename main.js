@@ -5,7 +5,7 @@ import { BasicCollisionDemo } from './scenes/basic-collision.js';
 const canvas = document.getElementById('canvas');
 
 // Choose which demo to run
-const DEMO_TYPE = 'rotation'; // Change to 'shapes' or 'rotation'
+const DEMO_TYPE = 'coll'; // Change to 'shapes' or 'rotation'
 
 let demo;
 if (DEMO_TYPE === 'rotation') {

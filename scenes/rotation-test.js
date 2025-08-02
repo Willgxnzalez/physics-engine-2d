@@ -11,7 +11,6 @@ export class RotationTestDemo {
         this.engine = new Engine();
         this.isPaused = false;
         this.debugMode = true;
-        this.time = 0;
         
         this.setup();
         this.setupControls();
@@ -22,110 +21,73 @@ export class RotationTestDemo {
         const HEIGHT = this.canvas.height;
 
         // Ground platform
-        this.ground = Shapes.Rect(WIDTH/2, HEIGHT - 30, WIDTH * 0.8, 40, { isStatic: true });
+        this.ground = Shapes.Rect(WIDTH/2, HEIGHT - 20, WIDTH * 0.9, 40, { isStatic: true });
         this.engine.addBody(this.ground);
 
-        // Create different rotation test scenarios
-        this.createOrbitalMotion();
-        this.createPendulumMotion();
-        this.createRotatingAroundPivot();
-        this.createSpinningBodies();
-        this.createRotationWithConstraints();
+        // Create simple rotation examples
+        this.createOrbitalExample();
+        this.createPendulumExample();
+        this.createSpinningExample();
+        this.createRotatingExample();
 
-        this.engine.setGravityStrength(30);
+        this.engine.setGravityStrength(20);
     }
 
-    createOrbitalMotion() {
-        // Central pivot point
-        this.centerPivot = Shapes.Circle(200, 200, 8, { isStatic: true, mass: 0 });
+    createOrbitalExample() {
+        // Central pivot
+        this.centerPivot = Shapes.Circle(150, 150, 6, { isStatic: true });
         this.engine.addBody(this.centerPivot);
 
-        // Orbiting bodies at different distances
-        this.orbit1 = Shapes.Circle(200, 150, 12, { mass: 1 });
-        this.orbit2 = Shapes.Circle(200, 100, 10, { mass: 0.8 });
-        this.orbit3 = Shapes.Circle(250, 200, 8, { mass: 0.6 });
+        // Two orbiting bodies
+        this.orbit1 = Shapes.Circle(150, 120, 10, { mass: 1 });
+        this.orbit2 = Shapes.Circle(200, 150, 8, { mass: 0.8 });
 
-        // Set initial velocities for orbital motion
-        this.orbit1.velocity.set(30, 0);
-        this.orbit2.velocity.set(25, 0);
-        this.orbit3.velocity.set(0, 20);
+        // Set orbital velocities
+        this.orbit1.velocity.set(25, 0);
+        this.orbit2.velocity.set(0, 20);
 
         this.engine.addBody(this.orbit1);
         this.engine.addBody(this.orbit2);
-        this.engine.addBody(this.orbit3);
     }
 
-    createPendulumMotion() {
+    createPendulumExample() {
         // Pendulum pivot
-        this.pendulumPivot = Shapes.Circle(400, 100, 6, { isStatic: true });
+        this.pendulumPivot = Shapes.Circle(350, 100, 6, { isStatic: true });
         this.engine.addBody(this.pendulumPivot);
 
-        // Pendulum bobs
-        this.pendulum1 = Shapes.Circle(400, 150, 15, { mass: 2 });
-        this.pendulum2 = Shapes.Circle(400, 200, 12, { mass: 1.5 });
-        this.pendulum3 = Shapes.Circle(400, 250, 10, { mass: 1 });
+        // Pendulum bob - start slightly offset to create swinging motion
+        this.pendulum = Shapes.Circle(370, 150, 12, { mass: 1.5 });
+        this.pendulum.velocity.set(0, 0);
 
-        // Set initial angular velocities for pendulum motion
-        this.pendulum1.angularVelocity = 0.5;
-        this.pendulum2.angularVelocity = -0.3;
-        this.pendulum3.angularVelocity = 0.7;
-
-        this.engine.addBody(this.pendulum1);
-        this.engine.addBody(this.pendulum2);
-        this.engine.addBody(this.pendulum3);
+        this.engine.addBody(this.pendulum);
     }
 
-    createRotatingAroundPivot() {
-        // Pivot point
-        this.rotatingPivot = Shapes.Circle(600, 200, 8, { isStatic: true });
-        this.engine.addBody(this.rotatingPivot);
+    createSpinningExample() {
+        // Three spinning bodies
+        this.spinningRect = Shapes.Rect(550, 150, 30, 20, { mass: 1 });
+        this.spinningCircle = Shapes.Circle(650, 150, 15, { mass: 1 });
+        this.spinningTriangle = Shapes.Circle(750, 150, 12, { mass: 1, segments: 3 });
 
-        // Bodies that rotate around the pivot
-        this.rotatingRect = Shapes.Rect(600, 150, 30, 20, { mass: 1 });
-        this.rotatingCircle = Shapes.Circle(650, 200, 12, { mass: 0.8 });
-        this.rotatingPoly = Shapes.Circle(600, 250, 15, { mass: 1.2, segments: 6 });
-
-        // Set angular velocities for rotation
-        this.rotatingRect.angularVelocity = 1.2;
-        this.rotatingCircle.angularVelocity = -0.8;
-        this.rotatingPoly.angularVelocity = 0.6;
-
-        this.engine.addBody(this.rotatingRect);
-        this.engine.addBody(this.rotatingCircle);
-        this.engine.addBody(this.rotatingPoly);
-    }
-
-    createSpinningBodies() {
-        // Bodies with different spin characteristics
-        this.spinningRect = Shapes.Rect(100, 350, 40, 30, { mass: 2 });
-        this.spinningCircle = Shapes.Circle(200, 350, 20, { mass: 1.5 });
-        this.spinningTriangle = Shapes.Circle(300, 350, 18, { mass: 1, segments: 3 });
-
-        // High angular velocities for spinning effect
-        this.spinningRect.angularVelocity = 3.0;
-        this.spinningCircle.angularVelocity = -2.5;
-        this.spinningTriangle.angularVelocity = 4.0;
+        // High spin speeds
+        this.spinningRect.angularVelocity = 4.0;
+        this.spinningCircle.angularVelocity = -3.0;
+        this.spinningTriangle.angularVelocity = 5.0;
 
         this.engine.addBody(this.spinningRect);
         this.engine.addBody(this.spinningCircle);
         this.engine.addBody(this.spinningTriangle);
     }
 
-    createRotationWithConstraints() {
-        // Constraint pivot
-        this.constraintPivot = Shapes.Circle(500, 350, 6, { isStatic: true });
-        this.engine.addBody(this.constraintPivot);
+    createRotatingExample() {
+        // Rotating pivot
+        this.rotatingPivot = Shapes.Circle(450, 300, 6, { isStatic: true });
+        this.engine.addBody(this.rotatingPivot);
 
-        // Constrained bodies
-        this.constrainedRect = Shapes.Rect(500, 320, 25, 25, { mass: 1 });
-        this.constrainedCircle = Shapes.Circle(530, 350, 15, { mass: 0.8 });
+        // Body rotating around pivot
+        this.rotatingBody = Shapes.Rect(450, 250, 25, 25, { mass: 1 });
+        this.rotatingBody.angularVelocity = 2.0;
 
-        // Apply forces to create constrained rotation
-        this.constrainedRect.applyForceAtPoint(new Vec2(5, 0), this.constrainedRect.position);
-        this.constrainedCircle.applyForceAtPoint(new Vec2(-3, 2), this.constrainedCircle.position);
-
-        this.engine.addBody(this.constrainedRect);
-        this.engine.addBody(this.constrainedCircle);
+        this.engine.addBody(this.rotatingBody);
     }
 
     setupControls() {
@@ -140,97 +102,47 @@ export class RotationTestDemo {
                 console.log(this.debugMode ? 'Debug ON' : 'Debug OFF');
             }
             if (event.code === 'KeyR') {
-                this.resetRotation();
-                console.log('Rotation reset');
-            }
-            if (event.code === 'KeyT') {
-                this.toggleRotationSpeeds();
-                console.log('Rotation speeds toggled');
+                this.resetDemo();
+                console.log('Demo reset');
             }
         });
     }
 
-    resetRotation() {
-        // Reset orbital motion
-        this.orbit1.setPosition(200, 150);
-        this.orbit2.setPosition(200, 100);
-        this.orbit3.setPosition(250, 200);
-        this.orbit1.velocity.set(30, 0);
-        this.orbit2.velocity.set(25, 0);
-        this.orbit3.velocity.set(0, 20);
+    resetDemo() {
+        // Reset orbital example
+        this.orbit1.setPosition(150, 120);
+        this.orbit2.setPosition(200, 150);
+        this.orbit1.velocity.set(25, 0);
+        this.orbit2.velocity.set(0, 20);
+        this.orbit1.angularVelocity = 0;
+        this.orbit2.angularVelocity = 0;
 
-        // Reset pendulum motion
-        this.pendulum1.setPosition(400, 150);
-        this.pendulum2.setPosition(400, 200);
-        this.pendulum3.setPosition(400, 250);
-        this.pendulum1.angularVelocity = 0.5;
-        this.pendulum2.angularVelocity = -0.3;
-        this.pendulum3.angularVelocity = 0.7;
+        // Reset pendulum example
+        this.pendulum.setPosition(370, 150);
+        this.pendulum.velocity.set(0, 0);
+        this.pendulum.angularVelocity = 0;
 
-        // Reset rotating bodies
-        this.rotatingRect.setPosition(600, 150);
-        this.rotatingCircle.setPosition(650, 200);
-        this.rotatingPoly.setPosition(600, 250);
-        this.rotatingRect.angularVelocity = 1.2;
-        this.rotatingCircle.angularVelocity = -0.8;
-        this.rotatingPoly.angularVelocity = 0.6;
+        // Reset spinning example
+        this.spinningRect.setPosition(550, 150);
+        this.spinningCircle.setPosition(650, 150);
+        this.spinningTriangle.setPosition(750, 150);
+        this.spinningRect.velocity.set(0, 0);
+        this.spinningCircle.velocity.set(0, 0);
+        this.spinningTriangle.velocity.set(0, 0);
+        this.spinningRect.angularVelocity = 4.0;
+        this.spinningCircle.angularVelocity = -3.0;
+        this.spinningTriangle.angularVelocity = 5.0;
 
-        // Reset spinning bodies
-        this.spinningRect.setPosition(100, 350);
-        this.spinningCircle.setPosition(200, 350);
-        this.spinningTriangle.setPosition(300, 350);
-        this.spinningRect.angularVelocity = 3.0;
-        this.spinningCircle.angularVelocity = -2.5;
-        this.spinningTriangle.angularVelocity = 4.0;
-
-        // Reset constrained bodies
-        this.constrainedRect.setPosition(500, 320);
-        this.constrainedCircle.setPosition(530, 350);
-        this.constrainedRect.velocity.set(0, 0);
-        this.constrainedCircle.velocity.set(0, 0);
-    }
-
-    toggleRotationSpeeds() {
-        // Toggle between normal and high rotation speeds
-        const bodies = [
-            this.orbit1, this.orbit2, this.orbit3,
-            this.pendulum1, this.pendulum2, this.pendulum3,
-            this.rotatingRect, this.rotatingCircle, this.rotatingPoly,
-            this.spinningRect, this.spinningCircle, this.spinningTriangle
-        ];
-
-        bodies.forEach(body => {
-            if (Math.abs(body.angularVelocity) > 0) {
-                body.angularVelocity *= 2;
-            }
-        });
+        // Reset rotating example
+        this.rotatingBody.setPosition(450, 250);
+        this.rotatingBody.velocity.set(0, 0);
+        this.rotatingBody.angularVelocity = 2.0;
     }
 
     update() {
         if (!this.isPaused) {
-            this.time += 1/60;
             this.engine.update(1 / 60);
-            
-            // Apply periodic forces for some bodies
-            this.applyPeriodicForces();
         }
-    }
-
-    applyPeriodicForces() {
-        // Apply periodic forces to create more interesting rotation patterns
-        const frequency = 2.0;
-        const amplitude = 10;
-        
-        // Apply forces to constrained bodies
-        this.constrainedRect.applyForceAtPoint(
-            new Vec2(amplitude * Math.sin(this.time * frequency), 0),
-            this.constrainedRect.position
-        );
-        
-        this.constrainedCircle.applyForceAtPoint(
-            new Vec2(0, amplitude * Math.cos(this.time * frequency * 0.7)),
-            this.constrainedCircle.position
-        );
     }
 
     render() {
@@ -241,7 +153,6 @@ export class RotationTestDemo {
         
         if (this.debugMode) {
             this.renderDebugInfo(contacts);
-            this.renderRotationInfo();
         }
         
         this.renderInfo();
@@ -262,17 +173,11 @@ export class RotationTestDemo {
         // Draw collision info
         for (const contact of contacts) {
             const center = contact.bodyA.position.add(contact.bodyB.position).scale(0.5);
-            const normalEnd = center.add(contact.normal.scale(30));
+            const normalEnd = center.add(contact.normal.scale(20));
             this.ctx.beginPath();
             this.ctx.moveTo(center.x, center.y);
             this.ctx.lineTo(normalEnd.x, normalEnd.y);
             this.ctx.stroke();
-            
-            for (const contactPoint of contact.contacts) {
-                this.ctx.beginPath();
-                this.ctx.arc(contactPoint.x, contactPoint.y, 4, 0, 2 * Math.PI);
-                this.ctx.fill();
-            }
         }
     }
 
@@ -283,10 +188,9 @@ export class RotationTestDemo {
 
         // Draw connections to pivots
         const pivotConnections = [
-            [this.centerPivot, [this.orbit1, this.orbit2, this.orbit3]],
-            [this.pendulumPivot, [this.pendulum1, this.pendulum2, this.pendulum3]],
-            [this.rotatingPivot, [this.rotatingRect, this.rotatingCircle, this.rotatingPoly]],
-            [this.constraintPivot, [this.constrainedRect, this.constrainedCircle]]
+            [this.centerPivot, [this.orbit1, this.orbit2]],
+            [this.pendulumPivot, [this.pendulum]],
+            [this.rotatingPivot, [this.rotatingBody]]
         ];
 
         for (const [pivot, bodies] of pivotConnections) {
@@ -301,43 +205,25 @@ export class RotationTestDemo {
         this.ctx.setLineDash([]);
     }
 
-    renderRotationInfo() {
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        this.ctx.fillRect(10, 140, 350, 100);
-        this.ctx.fillStyle = 'white';
-        this.ctx.font = '12px Arial';
-        
-        const bodies = [
-            { name: 'Orbit1', body: this.orbit1 },
-            { name: 'Pendulum1', body: this.pendulum1 },
-            { name: 'SpinningRect', body: this.spinningRect },
-            { name: 'ConstrainedRect', body: this.constrainedRect }
-        ];
-
-        let y = 160;
-        bodies.forEach(({ name, body }) => {
-            const angularVel = body.angularVelocity.toFixed(2);
-            const angle = (body.angle * 180 / Math.PI).toFixed(1);
-            this.ctx.fillText(`${name}: ω=${angularVel}rad/s, θ=${angle}°`, 15, y);
-            y += 15;
-        });
-    }
-
     renderInfo() {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        this.ctx.fillRect(10, 10, 400, 120);
+        this.ctx.fillRect(10, 10, 400, 140);
         this.ctx.fillStyle = 'white';
         this.ctx.font = '14px Arial';
         
         const lines = [
             'ROTATION TEST DEMO',
-            'Orbital Motion: Bodies orbiting around central pivot',
-            'Pendulum Motion: Swinging pendulum bobs',
-            'Rotating Bodies: Bodies rotating around pivot points',
-            'Spinning Bodies: High-speed rotation demonstration',
-            'Constrained Rotation: Bodies with applied forces',
             '',
-            'Controls: SPACE: Pause/Resume  D: Debug  R: Reset  T: Toggle Speed'
+            'Examples:',
+            '• Orbital Motion: Bodies orbiting around central pivot',
+            '• Pendulum Motion: Swinging pendulum bob',
+            '• Spinning Bodies: High-speed rotation demonstration',
+            '• Rotating Body: Body rotating around pivot point',
+            '',
+            'Controls:',
+            'SPACE: Pause/Resume',
+            'D: Toggle Debug Mode',
+            'R: Reset Demo'
         ];
         
         lines.forEach((line, index) => {
@@ -347,10 +233,10 @@ export class RotationTestDemo {
 
     renderPauseOverlay() {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.fillRect(10, 250, 300, 30);
+        this.ctx.fillRect(10, 160, 300, 30);
         this.ctx.fillStyle = 'white';
         this.ctx.font = '16px Arial';
-        this.ctx.fillText('PAUSED - Press SPACE to resume', 15, 270);
+        this.ctx.fillText('PAUSED - Press SPACE to resume', 15, 180);
     }
 
     run() {

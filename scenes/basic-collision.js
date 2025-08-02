@@ -11,49 +11,42 @@ export class BasicCollisionDemo {
         this.engine = new Engine();
         this.isPaused = false;
         this.debugMode = true;
+        this.width = canvas.width;
+        this.height = canvas.height;
         
         this.setup();
         this.setupControls();
     }
 
     setup() {
-        const WIDTH = this.canvas.width;
-        const HEIGHT = this.canvas.height;
-
         // Create bodies for collision testing
-        this.ground = Shapes.Rect(WIDTH/2, HEIGHT - 100, WIDTH, 50, { isStatic: true });
-        this.box1 = Shapes.Rect(200, 100, 100, 100, { mass: 1 });
-        this.box2 = Shapes.Rect(250, 100, 50, 50, { mass: 1 });
-        this.circle = Shapes.Circle(400, 50, 80, { mass: 2 });
+        this.ground = Shapes.Rect(this.width/2, this.height - 100, this.width, 50, { isStatic: true });
 
-        // Stack of three boxes
-        this.stackBox1 = Shapes.Rect(600, HEIGHT - 170, 60, 60, { mass: 1 });
-        this.stackBox2 = Shapes.Rect(600, HEIGHT - 240, 60, 60, { mass: 1 });
-        this.stackBox3 = Shapes.Rect(600, HEIGHT - 310, 60, 60, { mass: 1 });
+        this.box1 = Shapes.Rect(200, 100, 50, 50, { mass: 1 });
+        this.box2 = Shapes.Rect(250, 100, 200, 200, { mass: 1 });
 
-        // Row of circles
-        this.circle1 = Shapes.Circle(100, 300, 30, { mass: 1 });
-        this.circle2 = Shapes.Circle(170, 300, 30, { mass: 1 });
-        this.circle3 = Shapes.Circle(240, 300, 30, { mass: 1 });
+        this.circle1 = Shapes.Circle(400, 50, 120, { mass: 2 });
+        this.circle2 = Shapes.Circle(100, 300, 70, { mass: 1 });
 
-        // Polygon (triangle) colliding with a box
-        this.triangle = Shapes.Circle(350, 200, 40, { mass: 1, segments: 3 });
-        this.targetBox = Shapes.Rect(350, 350, 80, 40, { mass: 2 });
+        this.stackBox1 = Shapes.Rect(600, this.height - 500, 100, 100, { mass: 1 });
+        this.stackBox2 = Shapes.Rect(600, this.height - 350, 100, 100, { mass: 1 });
+        this.stackBox3 = Shapes.Rect(600, this.height - 200, 100, 100, { mass: 1 });
 
-        this.engine.addBody(this.ground);
+
+        this.triangle = Shapes.Circle(350, 200, 100, { mass: 1, segments: 3 });
+        this.triangle.rotate(Math.PI / 4);
+
+        this.engine.addBody(this.ground); 
         this.engine.addBody(this.box1);
         this.engine.addBody(this.box2);
-        this.engine.addBody(this.circle);
+        this.engine.addBody(this.circle1);
+        this.engine.addBody(this.circle2);
         this.engine.addBody(this.stackBox1);
         this.engine.addBody(this.stackBox2);
         this.engine.addBody(this.stackBox3);
-        this.engine.addBody(this.circle1);
-        this.engine.addBody(this.circle2);
-        this.engine.addBody(this.circle3);
         this.engine.addBody(this.triangle);
-        this.engine.addBody(this.targetBox);
 
-        this.engine.setGravityStrength(50);
+        this.engine.setGravityStrength(10);
     }
 
     setupControls() {
@@ -80,24 +73,18 @@ export class BasicCollisionDemo {
     }
 
     reset() {
-        const HEIGHT = this.canvas.height;
-
         this.box1.position.set(200, 100);
         this.box2.position.set(250, 100);
-        this.circle.position.set(400, 50);
-        this.stackBox1.position.set(600, HEIGHT - 170);
-        this.stackBox2.position.set(600, HEIGHT - 240);
-        this.stackBox3.position.set(600, HEIGHT - 310);
-        this.circle1.position.set(100, 300);
-        this.circle2.position.set(170, 300);
-        this.circle3.position.set(240, 300);
+        this.stackBox1.position.set(600, this.height - 500);
+        this.stackBox2.position.set(600, this.height - 350);
+        this.stackBox3.position.set(600, this.height - 200);
+        this.circle1.position.set(400, 50);
+        this.circle2.position.set(100, 300);
         this.triangle.position.set(350, 200);
-        this.targetBox.position.set(350, 350);
 
         this.engine.bodies.forEach(body => {
             body.velocity.set(0, 0);
             body.angularVelocity = 0;
-            body.rotation = 0;
         });
     }
 
@@ -108,7 +95,7 @@ export class BasicCollisionDemo {
     }
 
     render() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.width, this.height);
         
         const contacts = Detector.findCollisions(this.engine.bodies);
         Renderer.render(this.ctx, this.engine.bodies, this.debugMode);
@@ -128,11 +115,13 @@ export class BasicCollisionDemo {
         this.ctx.lineWidth = 2;
         
         for (const contact of contacts) {
-            // Draw collision normal
-            const center = contact.bodyA.position.add(contact.bodyB.position).scale(0.5);
-            const normalEnd = center.add(contact.normal.scale(30));
+
+            // Draw collision normals
+            const normalSize = 30;
+            const normalStart = contact.bodyA.position;
+            const normalEnd = normalStart.add(contact.normal.scale(normalSize));
             this.ctx.beginPath();
-            this.ctx.moveTo(center.x, center.y);
+            this.ctx.moveTo(normalStart.x, normalStart.y);
             this.ctx.lineTo(normalEnd.x, normalEnd.y);
             this.ctx.stroke();
             
@@ -151,8 +140,8 @@ export class BasicCollisionDemo {
                     this.ctx.lineTo(contact.contacts[i].x, contact.contacts[i].y);
                 }
                 this.ctx.closePath();
-                this.ctx.fillStyle = 'rgba(255, 255, 0, 0.3)';
-                this.ctx.fill();
+                this.ctx.fillStyle = 'rgba(255, 163, 227, 0.54)';
+                this.ctx.fill();  
                 this.ctx.restore();
             }
         }

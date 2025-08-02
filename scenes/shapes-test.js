@@ -21,72 +21,66 @@ export class ShapesTestDemo {
         const HEIGHT = this.canvas.height;
 
         // Ground platform
-        this.ground = Shapes.Rect(WIDTH/2, HEIGHT - 30, WIDTH * 0.8, 40, { isStatic: true });
+        this.ground = Shapes.Rect(WIDTH/2, HEIGHT - 20, WIDTH * 0.9, 40, { isStatic: true });
         this.engine.addBody(this.ground);
 
-        // Test different shapes
-        this.createRectangleTests();
-        this.createCircleTests();
-        this.createPolygonTests();
-        this.createMixedShapes();
+        // Create simple shape examples
+        this.createRectangleExamples();
+        this.createCircleExamples();
+        this.createPolygonExamples();
+        this.createRotatingExamples();
 
-        this.engine.setGravityStrength(30);
+        this.engine.setGravityStrength(20);
     }
 
-    createRectangleTests() {
-        // Spread rectangles horizontally, alternate sizes
-        this.smallRect = Shapes.Rect(80, 70, 30, 30, { mass: 1 });
-        this.mediumRect = Shapes.Rect(150, 70, 60, 60, { mass: 2 }); // larger
-        this.largeRect = Shapes.Rect(230, 70, 60, 30, { mass: 3 });
-        this.tallRect = Shapes.Rect(310, 70, 45, 100, { mass: 2 }); // larger
+    createRectangleExamples() {
+        // Different sized rectangles
+        this.smallRect = Shapes.Rect(100, 100, 30, 30, { mass: 1 });
+        this.mediumRect = Shapes.Rect(200, 100, 50, 40, { mass: 1.5 });
+        this.largeRect = Shapes.Rect(300, 100, 60, 30, { mass: 2 });
 
         this.engine.addBody(this.smallRect);
         this.engine.addBody(this.mediumRect);
         this.engine.addBody(this.largeRect);
-        this.engine.addBody(this.tallRect);
     }
 
-    createCircleTests() {
-        // Spread circles horizontally, alternate radii
-        this.smallCircle = Shapes.Circle(400, 70, 18, { mass: 1 });
-        this.mediumCircle = Shapes.Circle(470, 70, 48, { mass: 2 }); // larger
-        this.largeCircle = Shapes.Circle(540, 70, 36, { mass: 3 });
-        this.highSegments = Shapes.Circle(570, 140, 44, { mass: 1, segments: 32 }); // larger
+    createCircleExamples() {
+        // Different sized circles
+        this.smallCircle = Shapes.Circle(450, 100, 15, { mass: 1 });
+        this.mediumCircle = Shapes.Circle(550, 100, 25, { mass: 1.5 });
+        this.largeCircle = Shapes.Circle(650, 100, 35, { mass: 2 });
 
         this.engine.addBody(this.smallCircle);
         this.engine.addBody(this.mediumCircle);
         this.engine.addBody(this.largeCircle);
-        this.engine.addBody(this.highSegments);
     }
 
-    createPolygonTests() {
-        // Spread polygons horizontally, alternate radii
-        this.triangle = Shapes.Circle(80, 200, 28, { mass: 1, segments: 3 });
-        this.square = Shapes.Circle(150, 200, 48, { mass: 1, segments: 4 }); // larger
-        this.pentagon = Shapes.Circle(220, 200, 28, { mass: 1, segments: 5 });
-        this.hexagon = Shapes.Circle(290, 200, 48, { mass: 1, segments: 6 }); // larger
-        this.octagon = Shapes.Circle(360, 200, 28, { mass: 1, segments: 8 });
+    createPolygonExamples() {
+        // Different polygon shapes
+        this.triangle = Shapes.Circle(150, 250, 20, { mass: 1, segments: 3 });
+        this.square = Shapes.Circle(250, 250, 20, { mass: 1, segments: 4 });
+        this.pentagon = Shapes.Circle(350, 250, 20, { mass: 1, segments: 5 });
+        this.hexagon = Shapes.Circle(450, 250, 20, { mass: 1, segments: 6 });
 
         this.engine.addBody(this.triangle);
         this.engine.addBody(this.square);
         this.engine.addBody(this.pentagon);
         this.engine.addBody(this.hexagon);
-        this.engine.addBody(this.octagon);
     }
 
-    createMixedShapes() {
-        // Mixed shapes, alternate sizes
-        this.mixedRect = Shapes.Rect(440, 200, 80, 80, { mass: 2 }); // larger
-        this.mixedCircle = Shapes.Circle(510, 200, 24, { mass: 2 });
-        this.mixedPoly = Shapes.Circle(580, 200, 48, { mass: 2, segments: 7 }); // larger
+    createRotatingExamples() {
+        // Rotating shapes
+        this.rotatingRect = Shapes.Rect(550, 250, 40, 30, { mass: 1 });
+        this.rotatingCircle = Shapes.Circle(650, 250, 20, { mass: 1 });
+        this.rotatingPoly = Shapes.Circle(750, 250, 18, { mass: 1, segments: 5 });
 
-        this.mixedRect.angularVelocity = 2;
-        this.mixedCircle.angularVelocity = -1;
-        this.mixedPoly.angularVelocity = 1.5;
+        this.rotatingRect.angularVelocity = 2.0;
+        this.rotatingCircle.angularVelocity = -1.5;
+        this.rotatingPoly.angularVelocity = 3.0;
 
-        this.engine.addBody(this.mixedRect);
-        this.engine.addBody(this.mixedCircle);
-        this.engine.addBody(this.mixedPoly);
+        this.engine.addBody(this.rotatingRect);
+        this.engine.addBody(this.rotatingCircle);
+        this.engine.addBody(this.rotatingPoly);
     }
 
     setupControls() {
@@ -101,40 +95,59 @@ export class ShapesTestDemo {
                 console.log(this.debugMode ? 'Debug ON' : 'Debug OFF');
             }
             if (event.code === 'KeyR') {
-                this.resetShapes();
-                console.log('Shapes reset');
+                this.resetDemo();
+                console.log('Demo reset');
             }
         });
     }
 
-    resetShapes() {
-        // Reset all shapes to their original positions
-        const shapes = [
-            this.smallRect, this.mediumRect, this.largeRect, this.tallRect,
-            this.smallCircle, this.mediumCircle, this.largeCircle, this.highSegments,
-            this.triangle, this.square, this.pentagon, this.hexagon, this.octagon,
-            this.mixedRect, this.mixedCircle, this.mixedPoly
-        ];
+    resetDemo() {
+        // Reset rectangle examples
+        this.smallRect.setPosition(100, 100);
+        this.mediumRect.setPosition(200, 100);
+        this.largeRect.setPosition(300, 100);
+        this.smallRect.velocity.set(0, 0);
+        this.mediumRect.velocity.set(0, 0);
+        this.largeRect.velocity.set(0, 0);
+        this.smallRect.angularVelocity = 0;
+        this.mediumRect.angularVelocity = 0;
+        this.largeRect.angularVelocity = 0;
 
-        const originalPositions = [
-            [80, 70], [150, 70], [230, 70], [310, 70],
-            [400, 70], [470, 70], [540, 70], [570, 140],
-            [80, 200], [150, 200], [220, 200], [290, 200], [360, 200],
-            [440, 200], [510, 200], [580, 200]
-        ];
+        // Reset circle examples
+        this.smallCircle.setPosition(450, 100);
+        this.mediumCircle.setPosition(550, 100);
+        this.largeCircle.setPosition(650, 100);
+        this.smallCircle.velocity.set(0, 0);
+        this.mediumCircle.velocity.set(0, 0);
+        this.largeCircle.velocity.set(0, 0);
+        this.smallCircle.angularVelocity = 0;
+        this.mediumCircle.angularVelocity = 0;
+        this.largeCircle.angularVelocity = 0;
 
-        shapes.forEach((shape, index) => {
-            const [x, y] = originalPositions[index];
-            shape.setPosition(x, y);
-            shape.setAngle(0);
-            shape.velocity.set(0, 0);
-            shape.angularVelocity = 0;
-        });
+        // Reset polygon examples
+        this.triangle.setPosition(150, 250);
+        this.square.setPosition(250, 250);
+        this.pentagon.setPosition(350, 250);
+        this.hexagon.setPosition(450, 250);
+        this.triangle.velocity.set(0, 0);
+        this.square.velocity.set(0, 0);
+        this.pentagon.velocity.set(0, 0);
+        this.hexagon.velocity.set(0, 0);
+        this.triangle.angularVelocity = 0;
+        this.square.angularVelocity = 0;
+        this.pentagon.angularVelocity = 0;
+        this.hexagon.angularVelocity = 0;
 
-        // Restore rotations for mixed shapes
-        this.mixedRect.angularVelocity = 2;
-        this.mixedCircle.angularVelocity = -1;
-        this.mixedPoly.angularVelocity = 1.5;
+        // Reset rotating examples
+        this.rotatingRect.setPosition(550, 250);
+        this.rotatingCircle.setPosition(650, 250);
+        this.rotatingPoly.setPosition(750, 250);
+        this.rotatingRect.velocity.set(0, 0);
+        this.rotatingCircle.velocity.set(0, 0);
+        this.rotatingPoly.velocity.set(0, 0);
+        this.rotatingRect.angularVelocity = 2.0;
+        this.rotatingCircle.angularVelocity = -1.5;
+        this.rotatingPoly.angularVelocity = 3.0;
     }
 
     update() {
@@ -168,36 +181,33 @@ export class ShapesTestDemo {
         for (const contact of contacts) {
             // Draw collision normal
             const center = contact.bodyA.position.add(contact.bodyB.position).scale(0.5);
-            const normalEnd = center.add(contact.normal.scale(30));
+            const normalEnd = center.add(contact.normal.scale(20));
             this.ctx.beginPath();
             this.ctx.moveTo(center.x, center.y);
             this.ctx.lineTo(normalEnd.x, normalEnd.y);
             this.ctx.stroke();
-            
-            // Draw contact points
-            for (const contactPoint of contact.contacts) {
-                this.ctx.beginPath();
-                this.ctx.arc(contactPoint.x, contactPoint.y, 4, 0, 2 * Math.PI);
-                this.ctx.fill();
-            }
         }
     }
 
     renderInfo() {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-        this.ctx.fillRect(10, 10, 300, 120);
+        this.ctx.fillRect(10, 10, 400, 140);
         this.ctx.fillStyle = 'white';
         this.ctx.font = '14px Arial';
         
         const lines = [
             'SHAPES TEST DEMO',
-            'Rectangles: Small, Medium, Large, Tall',
-            'Circles: Small, Medium, Large, High-res',
-            'Polygons: Triangle, Square, Pentagon, Hex, Octagon',
-            'Mixed: Rotating shapes with different types',
+            '',
+            'Examples:',
+            '• Rectangles: Small, Medium, Large',
+            '• Circles: Small, Medium, Large',
+            '• Polygons: Triangle, Square, Pentagon, Hexagon',
+            '• Rotating: Shapes with constant rotation',
             '',
             'Controls:',
-            'SPACE: Pause/Resume  D: Debug  R: Reset'
+            'SPACE: Pause/Resume',
+            'D: Toggle Debug Mode',
+            'R: Reset Demo'
         ];
         
         lines.forEach((line, index) => {
@@ -207,10 +217,10 @@ export class ShapesTestDemo {
 
     renderPauseOverlay() {
         this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        this.ctx.fillRect(10, 140, 300, 30);
+        this.ctx.fillRect(10, 160, 300, 30);
         this.ctx.fillStyle = 'white';
         this.ctx.font = '16px Arial';
-        this.ctx.fillText('PAUSED - Press SPACE to resume', 15, 160);
+        this.ctx.fillText('PAUSED - Press SPACE to resume', 15, 180);
     }
 
     run() {

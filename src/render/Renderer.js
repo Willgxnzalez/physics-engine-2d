@@ -37,7 +37,7 @@ export class Renderer {
         ctx.save();
         
         // Set bounding box style
-        ctx.strokeStyle = '#ff0000'; // Red color for bounds
+        ctx.strokeStyle = '#faa900'; // Orange color for bounds
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 5]); // Dashed line for bounds
         
