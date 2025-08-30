@@ -1,36 +1,48 @@
 import { Vec2 } from '../geometry/Vec2.js';
+import { GravityForce } from './Force.js';
 
 export class Engine {
   constructor() {
     this.bodies = [];
-    this.gravityEnabled = true;
-    this.gravityStrength = 100;
-    this.gravityDirection = new Vec2(0, 1); // Downward unit vector
-    this.forces = [];
-
+    this.forces = new Map(); // Map<name, Force>
     this.paused = false;
 
-    this.gravityForce = (body) => {
-      if (this.gravityEnabled && !body.isStatic) 
-        return this.gravityDirection.scale(this.gravityStrength * body.mass);
-      return null;
-    };
-    this.addForce(this.gravityForce);
+    // Initialize with gravity
+    this.addForce(new GravityForce({ strength: 100 }));
   }
 
   addBody(body) {
     this.bodies.push(body);
   }
 
-  addForce(forceFunction) {
-    this.forces.push(forceFunction);
+  addForce(force) {
+    this.forces.set(force.name, force);
   }
 
-  removeForce(forceFunction) {
-    const index = this.forces.indexOf(forceFunction);
-    if (index > -1) {
-      this.forces.splice(index, 1);
-    }
+  removeForce(name) {
+    return this.forces.delete(name);
+  }
+
+  getForce(name) {
+    return this.forces.get(name);
+  }
+
+  enableForce(name) {
+    const force = this.forces.get(name);
+    if (force) force.enable();
+  }
+
+  disableForce(name) {
+    const force = this.forces.get(name);
+    if (force) force.disable();
+  }
+
+  listForces() {
+    return Array.from(this.forces.keys());
+  }
+
+  listEnabledForces() {
+    return Array.from(this.forces.values()).filter(force => force.enabled);
   }
 
   pause() {
@@ -46,29 +58,43 @@ export class Engine {
   }
 
   enableGravity() {
-    this.gravityEnabled = true;
+    this.enableForce('gravity');
   }
 
   disableGravity() {
-    this.gravityEnabled = false;
+    this.disableForce('gravity');
   }
 
   setGravityStrength(strength) {
-    this.gravityStrength = strength;
+    const gravity = this.getForce('gravity');
+    if (gravity) gravity.setStrength(strength);
   }
 
   setGravityDirection(directionVec2) {
-    this.gravityDirection = directionVec2.normalize();
+    const gravity = this.getForce('gravity');
+    if (gravity) gravity.setDirection(directionVec2);
   }
 
   update(dt) {
     if (this.paused) return;
 
-    for (const forceFunction of this.forces) {
+    // Update all forces (for time-based behavior)
+    for (const force of this.forces.values()) {
+      if (force.enabled) {
+        force.update(dt);
+      }
+    }
+
+    // Apply all forces to all bodies
+    for (const force of this.forces.values()) {
+      if (!force.enabled) continue;
+      
       for (const body of this.bodies) {
-        const force = forceFunction(body);
-        if (force) {
-          body.applyForce(force);
+        if (force.shouldApplyTo(body)) {
+          const forceVector = force.calculate(body, dt);
+          if (forceVector) {
+            body.applyForce(forceVector);
+          }
         }
       }
     }
