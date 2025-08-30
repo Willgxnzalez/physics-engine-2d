@@ -180,8 +180,8 @@ export class ShapesTestDemo {
         
         for (const contact of contacts) {
             // Draw collision normal
-            const center = contact.bodyA.position.add(contact.bodyB.position).scale(0.5);
-            const normalEnd = center.add(contact.normal.scale(20));
+            const center = contact.bodyA.position.add(contact.bodyB.position).scaleEq(0.5);
+            const normalEnd = center.clone().addEq(contact.normal.scale(20));
             this.ctx.beginPath();
             this.ctx.moveTo(center.x, center.y);
             this.ctx.lineTo(normalEnd.x, normalEnd.y);

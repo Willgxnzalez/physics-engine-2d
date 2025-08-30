@@ -24,7 +24,7 @@ export class Manifold {
      * @returns {Vec2} The minimum translation vector
      */
     mtv() {
-        return this.normal.scale(this.penetration)
+        return this.normal.scale(this.penetration);
     }
 
     get contacts() {

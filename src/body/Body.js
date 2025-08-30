@@ -218,8 +218,8 @@ export class Body {
 
         // Linear integration (Semi-Implicit Euler)
         const acceleration = this.force.scale(this.invMass);
-        this.velocity.translate(acceleration.scale(dt));
-        this.position.translate(this.velocity.scale(dt));
+        this.velocity.addEq(acceleration.scaleEq(dt));
+        this.position.addEq(this.velocity.scale(dt));
 
         // Update world transform
         this._updateWorldVerticesAndBounds();

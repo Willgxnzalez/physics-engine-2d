@@ -9,45 +9,25 @@ export class Vec2 {
     }
 
     // Core operations
-    set(x, y) {
-        this.x = x;
-        this.y = y;
-        return this; 
-    } 
-
-    clone() {
-        return new Vec2(this.x, this.y);
-    }
+    set(x, y) { this.x = x; this.y = y; return this; } 
+    clone() { return new Vec2(this.x, this.y); }
 
     // Arithmetic operations
-    add(vec) {
-        return new Vec2(this.x + vec.x, this.y + vec.y);
-    }
+    add(vec) { return new Vec2(this.x + vec.x, this.y + vec.y); }
+    sub(vec) { return new Vec2(this.x - vec.x, this.y - vec.y); }
+    scale(scalar) { return new Vec2(this.x * scalar, this.y * scalar); }
 
-    sub(vec) {
-        return new Vec2(this.x - vec.x, this.y - vec.y);
-    }
+    // Mutating versions for hot loops
+    addEq(vec) { this.x += vec.x; this.y += vec.y; return this; }
+    subEq(vec) { this.x -= vec.x; this.y -= vec.y; return this; }
+    scaleEq(scalar) { this.x *= scalar; this.y *= scalar; return this; }
 
-    scale(scalar) {
-        return new Vec2(this.x * scalar, this.y * scalar);
-    }
-
-    negate() {
-        return new Vec2(-this.x, -this.y);
-    }
+    negate() { return new Vec2(-this.x, -this.y);}
 
     // Geometric operations
-    dot(vec) {
-        return this.x * vec.x + this.y * vec.y;
-    }
-
-    cross(vec) {
-        return this.x * vec.y - this.y * vec.x; // 2D cross product
-    }
-
-    magnitude() {
-        return Math.sqrt(this.x * this.x + this.y * this.y);
-    }
+    dot(vec) { return this.x * vec.x + this.y * vec.y; }
+    cross(vec) { return this.x * vec.y - this.y * vec.x; } // 2D cross product
+    magnitude() { return Math.sqrt(this.x * this.x + this.y * this.y); }
 
     normalize() {
         const mag = this.magnitude();
@@ -59,11 +39,7 @@ export class Vec2 {
         return new Vec2(-this.y, this.x);
     }
 
-    /**
-     * Returns the Euclidean distance between this vector and another vector
-     * @param {Vec2} vec
-     * @returns {number}
-     */
+    // Euclidian Distance
     distanceTo(vec) {
         const dx = this.x - vec.x;
         const dy = this.y - vec.y;
@@ -80,7 +56,7 @@ export class Vec2 {
             return new Vec2(
                 translated.x * cos - translated.y * sin,
                 translated.x * sin + translated.y * cos
-            ).add(point);
+            ).addEq(point);
         } else {
             return new Vec2(
                 this.x * cos - this.y * sin,
@@ -89,9 +65,5 @@ export class Vec2 {
         }
     }
 
-    translate(offset) {
-        this.x += offset.x;
-        this.y += offset.y;
-        return this;
-    }
+    translate(offset) { this.x += offset.x; this.y += offset.y; return this; }
 }

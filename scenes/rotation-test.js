@@ -172,7 +172,7 @@ export class RotationTestDemo {
         
         // Draw collision info
         for (const contact of contacts) {
-            const center = contact.referenceBody.position.add(contact.incidentBody.position).scale(0.5);
+            const center = contact.referenceBody.position.add(contact.incidentBody.position).scaleEq(0.5);
             const normalEnd = center.add(contact.normal.scale(20));
             this.ctx.beginPath();
             this.ctx.moveTo(center.x, center.y);
