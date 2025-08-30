@@ -3,6 +3,7 @@ import { Shapes } from '../../src/factory/Shapes.js';
 import { Renderer } from '../../src/render/Renderer.js';
 import { Vec2 } from '../../src/geometry/Vec2.js';
 import { Detector } from '../../src/collision/Detector.js';
+import { Body } from '../src/body/Body.js';
 
 export class PhysicsTestDemo {
     constructor(canvas) {
@@ -26,21 +27,29 @@ export class PhysicsTestDemo {
         this.ground = Shapes.Rect(this.width/2, this.height - 100, this.width, 50, { isStatic: true });
         this.engine.addBody(this.ground);
 
-        // Create collision test shapes (from basic-collision)
-        this.box1 = Shapes.Rect(200, 100, 50, 50, { mass: 1 });
+        this.box1 = Shapes.Rect(100, 100, 50, 50, { mass: 1 });
         this.box2 = Shapes.Rect(250, 100, 200, 200, { mass: 1 });
     
-        this.circle1 = Shapes.Circle(400, 50, 120, { mass: 2 });
+        this.circle1 = Shapes.Circle(500, 100, 90, { mass: 2 });
         this.circle2 = Shapes.Circle(100, 300, 70, { mass: 1 });
 
-        // Stack of boxes
         this.stackBox1 = Shapes.Rect(600, this.height - 500, 100, 100, { mass: 1 });
-        this.stackBox2 = Shapes.Rect(600, this.height - 350, 100, 100, { mass: 1 });
-        this.stackBox3 = Shapes.Rect(600, this.height - 200, 100, 100, { mass: 1 });
+        this.stackBox2 = Shapes.Rect(550, this.height - 350, 100, 100, { mass: 1 });
+        this.stackBox3 = Shapes.Rect(650, this.height - 350, 100, 100, { mass: 1 });
 
-        // Triangle
-        this.triangle = Shapes.Circle(350, 200, 100, { mass: 1, segments: 3 });
-        this.triangle.rotate(Math.PI / 4);
+        const triSize = 100;
+        const triHeight = triSize * Math.sqrt(3) / 2;
+        const triVerts = [
+            new Vec2(0, -triHeight / 2),
+            new Vec2(-triSize / 2, triHeight / 2),
+            new Vec2(triSize / 2, triHeight / 2)
+        ];
+        this.triangle = new Body({
+            position: new Vec2(350, 400),
+            vertices: triVerts,
+            mass: 1,
+            type: 'triangle'
+        });
 
         // Add all bodies to engine
         this.engine.addBody(this.box1);
@@ -52,7 +61,7 @@ export class PhysicsTestDemo {
         this.engine.addBody(this.stackBox3);
         this.engine.addBody(this.triangle);
 
-        this.engine.setGravityStrength(10);
+        this.engine.setGravityStrength(40);
     }
 
     setupControls() {
@@ -76,6 +85,11 @@ export class PhysicsTestDemo {
     update() {
         if (!this.isPaused) {
             this.engine.update(1 / 60);
+            for (const body of this.engine.bodies) {
+                if (body.position.y > this.height) {   
+                    body.position.y = 0;
+                }
+            }
         }
     }
 
