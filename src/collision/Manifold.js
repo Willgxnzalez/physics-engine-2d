@@ -6,33 +6,17 @@ export class Manifold {
     constructor(referenceBody, incidentBody) {
         this.referenceBody = referenceBody; // Reference body
         this.incidentBody = incidentBody; // Incident body
-        this.normal = new Vec2(0, 0);        // Direction of collision resolution (from A to B) pointing from reference to incident body
+        this.normal = new Vec2(0, 0);        // Direction of collision resolution pointing from reference to incident body
         this.penetration = 0;                // Penetration depth
         this._contacts = [];                 // Contact points
     }
 
-    /**
-     * Check if this manifold has valid contact information
-     * @returns {boolean} True if manifold has valid collision data
-     */
-    isValid() {
-        return this.contacts.length > 0 && this.penetration > 0;
-    }
+    isValid() { return this.contacts.length > 0 && this.penetration > 0; }
 
-    /**
-     * Get the minimum translation vector
-     * @returns {Vec2} The minimum translation vector
-     */
-    mtv() {
-        return this.normal.scale(this.penetration);
-    }
+    mtv() { return this.normal.scale(this.penetration); }
 
-    get contacts() {
-        return this._contacts;
-    }
-    set contacts(val) {
-        this._contacts = val;
-    }
+    get contacts() { return this._contacts; }
+    set contacts(val) { this._contacts = val; }
 
     get deepestContacts() {
         return this._getDeepestContacts();
@@ -61,11 +45,6 @@ export class Manifold {
         return this._selectFarthestContacts(deepest);
     }
     
-    /**
-     * Calculate the penetration depth of a contact point
-     * @param {Vec2} contactPoint - The contact point
-     * @returns {number} The penetration depth
-     */
     _calculateContactDepth(contactPoint) {
         // Project contact point onto the collision normal
         let minDistance = Infinity;
@@ -77,11 +56,6 @@ export class Manifold {
         return Math.abs(minDistance);
     }
 
-    /**
-     * Select the two contact points that are furthest apart
-     * @param {Array<Vec2>} contacts - Contact points to choose from
-     * @returns {Array<Vec2>} The two furthest contact points
-     */
     _selectFarthestContacts(contacts) {
         if (contacts.length <= 2) return contacts;
         let maxDistance = 0;
