@@ -66,4 +66,9 @@ export class Engine {
       body.update(dt);
     }
   }
+
+  reset() {
+    this.bodies = []
+    this.forces.clear();
+  }
 }
