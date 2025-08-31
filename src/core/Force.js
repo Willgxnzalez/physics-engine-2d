@@ -1,7 +1,7 @@
 import { Vec2 } from '../geometry/Vec2.js';
 
 /**
- * Base Force class - all forces inherit from this
+ * Base Force class
  */
 // Force.js
 export class Force {

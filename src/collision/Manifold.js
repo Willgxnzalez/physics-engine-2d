@@ -5,25 +5,29 @@ import { Vec2 } from '../geometry/Vec2.js';
 export class Manifold {
     constructor(referenceBody, incidentBody) {
         this.referenceBody = referenceBody; // Reference body
-        this.incidentBody = incidentBody; // Incident body
-        this.normal = new Vec2(0, 0);        // Direction of collision resolution pointing from reference to incident body
-        this.penetration = 0;                // Penetration depth
-        this._contacts = [];                 // Contact points
+        this.incidentBody = incidentBody;   // Incident body
+        this.normal = new Vec2(0, 0);       // Direction of collision resolution pointing from reference to incident body
+        this.penetration = 0;               // Penetration depth
+        this._contacts = [];                // Contact points
     }
 
     isValid() { return this.contacts.length > 0 && this.penetration > 0; }
 
     mtv() { return this.normal.scale(this.penetration); }
 
-    get contacts() { return this._contacts; }
-    set contacts(val) { this._contacts = val; }
-
-    get deepestContacts() {
+    get contacts() {
         return this._getDeepestContacts();
     }
 
+    get allContacts() {
+        return this._contacts;
+    }
+
+    set contacts(val) {
+        this._contacts = val;
+    }
+
     _getDeepestContacts() {
-        if (this._contacts.length === 0) return [];
         if (this._contacts.length <= 2) return this._contacts;
     
         const contactsWithDepth = this._contacts.map(p => ({
