@@ -1,6 +1,5 @@
 /**
  * Represents a 2D vector with x and y components.
- * All methods return new instances for immutable operations.
  */
 export class Vec2 {
     constructor(x = 0, y = 0) {
