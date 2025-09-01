@@ -1,7 +1,12 @@
+import { Detector } from '../collision/Detector.js'
+
 export class Engine {
   constructor() {
     this.bodies = [];
     this.forces = new Map(); // Map<name, Force>
+
+    this.detector = new Detector();
+    this._manifolds = [];
   }
 
   // --- Bodies ---
@@ -65,10 +70,22 @@ export class Engine {
     for (const body of this.bodies) {
       body.update(dt);
     }
+
+    // Save this frame's manifolds
+    this._manifolds = this.detector.detect(this.bodies);
   }
 
+  // --- Convenience methods ---
   reset() {
     this.bodies = []
     this.forces.clear();
+  }
+
+  getManifolds() {
+    return this._manifolds; 
+  }
+
+  getAllContacts() {
+    return this._manifolds.flatMap(m => m.allContacts);
   }
 }

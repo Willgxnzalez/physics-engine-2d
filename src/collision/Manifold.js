@@ -1,4 +1,5 @@
 import { Vec2 } from '../geometry/Vec2.js';
+
 /**
  * Manifold class for storing collision information between two bodies.
  */
@@ -8,24 +9,20 @@ export class Manifold {
         this.incidentBody = incidentBody;   // Incident body
         this.normal = new Vec2(0, 0);       // Direction of collision resolution pointing from reference to incident body
         this.penetration = 0;               // Penetration depth
-        this._contacts = [];                // Contact points
+        this._contacts = [];                // All contact points (raw)
     }
 
     isValid() { return this.contacts.length > 0 && this.penetration > 0; }
 
     mtv() { return this.normal.scale(this.penetration); }
 
-    get contacts() {
-        return this._getDeepestContacts();
-    }
+    /** Returns deepest c */
+    get contacts() { return this._getDeepestContacts(); }
 
-    get allContacts() {
-        return this._contacts;
-    }
+    /** Returns all raw contacts */
+    get allContacts() { return this._contacts; }
 
-    set contacts(val) {
-        this._contacts = val;
-    }
+    set contacts(val) { this._contacts = val; }
 
     _getDeepestContacts() {
         if (this._contacts.length <= 2) return this._contacts;
@@ -35,11 +32,9 @@ export class Manifold {
             depth: this._calculateContactDepth(p)
         }));
         
-        // Find the deepest contact
         const maxDepth = Math.max(...contactsWithDepth.map(c => c.depth));
         const tolerance = 0.01;
     
-        // Filter to contacts within tolerance of max depth
         const deepest = contactsWithDepth
             .filter(c => Math.abs(c.depth - maxDepth) < tolerance)
             .map(c => c.point);
@@ -50,7 +45,7 @@ export class Manifold {
     }
     
     _calculateContactDepth(contactPoint) {
-        // Project contact point onto the collision normal
+        // Project contact point onto the collision normal relative to referenceBody
         let minDistance = Infinity;
         for (let i = 0; i < this.referenceBody.vertices.length; i++) {
             const vertex = this.referenceBody.vertices.at(i);
@@ -62,8 +57,10 @@ export class Manifold {
 
     _selectFarthestContacts(contacts) {
         if (contacts.length <= 2) return contacts;
+
         let maxDistance = 0;
         let farthestPair = [contacts[0], contacts[1]];
+
         for (let i = 0; i < contacts.length; i++) {
             for (let j = i + 1; j < contacts.length; j++) {
                 const distance = contacts[i].distanceTo(contacts[j]);
@@ -73,6 +70,7 @@ export class Manifold {
                 }
             }
         }
+
         return farthestPair;  
     }
 }

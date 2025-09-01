@@ -5,8 +5,8 @@
 import { Collision } from './Collision.js';
 
 export class Detector {
-    static findCollisions(bodies) {
-        const contacts = [];
+    detect(bodies) {
+        const manifolds = [];
 
         for (let i = 0; i < bodies.length; i++) {
             for (let j = i + 1; j < bodies.length; j++) {
@@ -21,10 +21,10 @@ export class Detector {
                 // Narrow phase: SAT collision detection
                 const manifold = Collision.PolygonVsPolygon(bodyA, bodyB);
                 if (manifold.isValid()) {
-                    contacts.push(manifold);
+                    manifolds.push(manifold);
                 }
             }
         }
-        return contacts;
+        return manifolds;
     }
 }
