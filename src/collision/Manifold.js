@@ -14,7 +14,7 @@ export class Manifold {
 
     isValid() { return this.contacts.length > 0 && this.penetration > 0; }
 
-    mtv() { return this.normal.scale(this.penetration); }
+    get mtv() { return this.normal.scale(this.penetration); }
 
     /** Returns deepest c */
     get contacts() { return this._getDeepestContacts(); }
