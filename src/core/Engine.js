@@ -70,23 +70,37 @@ export class Engine {
 
     // --- Simulation Step ---
     update(dt) {
-        // Apply all enabled forces
+        // 1. Update forces that have internal state
         for (const force of this.forces.values()) {
-        if (!force.enabled) continue;
+            if (!force.enabled) continue;
+            force.update(dt);
+        }
 
-        force.update(dt);
-
+        // 2. Apply forces to bodies
         for (const body of this.bodies) {
-            if (force.shouldApplyTo(body)) {
-            const f = force.apply(body);
-            if (f) body.applyForce(f);
+            if (body.isStatic) continue;
+
+            for (const force of this.forces.values()) {
+                if (!force.enabled || !force.shouldApplyTo(body)) continue;
+
+                const result = force.apply(body);
+                if (!result) continue;
+
+                if (result.force && result.point) {
+                    body.applyForceAtPoint(result.force, result.point);
+                } else if (result.force) {
+                    body.applyForce(result.force);
+                }
+
+                if (result.torque) {
+                    body.applyTorque(result.torque);
+                }
             }
         }
-        }
 
-        // Update bodies
+        // 3. Integrate all bodies
         for (const body of this.bodies) {
-        body.update(dt);
+            body.update(dt);
         }
 
         // Save this frame's manifolds

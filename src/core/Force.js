@@ -3,7 +3,6 @@ import { Vec2 } from '../geometry/Vec2.js';
 /**
  * Base Force class
  */
-// Force.js
 export class Force {
     constructor(name, options = {}) {
         this.name = name;
@@ -53,7 +52,7 @@ export class GravityForce extends Force {
     }
 
     apply(body) {
-        return this.direction.scale(this.strength * body.mass);
+        return { force: this.direction.scale(this.strength * body.mass) };
     }
 
     setStrength(strength) {
