@@ -103,7 +103,7 @@ export class Vertices {
         for (let i = 0; i < this._points.length; i++) {
             const p0 = this._points[i];
             const p1 = this._points[(i+1) % this._points.length];
-            const normal = new Vec2(p1.y - p0.y, p0.x - p1.x).normalize();
+            const normal = new Vec2(p1.y - p0.y, p0.x - p1.x).norm();
             normals.push(normal);
         }
         return normals;
