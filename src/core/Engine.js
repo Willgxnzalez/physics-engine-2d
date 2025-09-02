@@ -90,7 +90,6 @@ export class Engine {
         }
 
         // Save this frame's manifolds
-
         this._manifolds = this.detector.detect(this.bodies);
         if (this._collisionEnabled) this.resolver.resolve(this._manifolds);
     }

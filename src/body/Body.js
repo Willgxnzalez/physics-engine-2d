@@ -41,10 +41,8 @@ export class Body {
         this.width = width;
         this.height = height;
         this.radius = radius;
-        this._updateWorldVerticesAndBounds();
+        this.updateWorldVerticesAndBounds();
         
-        Object.assign(this, props); // allow custom properties
-
         // Physical properties
         this.isStatic = isStatic;
         this.mass = this.isStatic ? Infinity : mass;
@@ -52,6 +50,7 @@ export class Body {
         this.invMass = this.isStatic ? 0 : 1 / this.mass;
         this.invInertia = (this.isStatic || this.inertia === 0) ? 0 : 1 / this.inertia;
         
+        Object.assign(this, props); // allow custom properties
     }
 
     /**
@@ -65,6 +64,7 @@ export class Body {
         this.invInertia = 0;
         this.velocity.set(0, 0);
         this.angularVelocity = 0;
+        this.updateWorldVerticesAndBounds();
     }
     
     /**
@@ -80,6 +80,7 @@ export class Body {
         this.invMass = 1 / mass;
         this.inertia = this._computeInertia();
         this.invInertia = this.inertia === 0 ? 0 : 1 / this.inertia;
+        this.updateWorldVerticesAndBounds();
     }
 
     /**
@@ -102,8 +103,7 @@ export class Body {
      */
     setPosition(x, y) {
         this.position.set(x, y);
-        this._updateWorldVerticesAndBounds();
-        this.bounds = Bounds.fromVertices(this.vertices);
+        this.updateWorldVerticesAndBounds();
     }
 
     /**
@@ -112,8 +112,7 @@ export class Body {
      */
     setAngle(angle) {
         this.angle = angle;
-        this._updateWorldVerticesAndBounds();
-        this.bounds = Bounds.fromVertices(this.vertices);
+        this.updateWorldVerticesAndBounds();
     }
 
     /**
@@ -122,10 +121,11 @@ export class Body {
      * @param {number} angle - New angle in radians
      */
     setTransform(position, angle) {
-        this.setPosition(position.x, position.y);
-        this.setAngle(angle);
+        this.position.set(x, y);
+        this.angle = angle;
+        this.updateWorldVerticesAndBounds();
     }
-
+    
     /**
      * Rotate the body by a given angle (in radians)
      * @param {number} angle - Angle to rotate by (radians)
@@ -216,7 +216,7 @@ export class Body {
     /**
      * Update world vertices and bounds based on current position and angle
      */
-    _updateWorldVerticesAndBounds() {
+    updateWorldVerticesAndBounds() {
         this.vertices = this.localVertices.clone();
         if (this.angle !== 0) {
             this.vertices.rotateInPlace(this.angle);
@@ -239,7 +239,7 @@ export class Body {
         this.position.addEq(this.velocity.scale(dt));
 
         // Update world transform
-        this._updateWorldVerticesAndBounds();
+        this.updateWorldVerticesAndBounds();
 
         // Clear accumulated forces for next frame
         this.force.set(0, 0);

@@ -77,8 +77,8 @@ export class Resolver {
       }
   
       // update vertices/bounds
-      A._updateWorldVerticesAndBounds();
-      B._updateWorldVerticesAndBounds();
+      A.updateWorldVerticesAndBounds();
+      B.updateWorldVerticesAndBounds();
     }
   }
   
