@@ -26,15 +26,15 @@ export class Vec2 {
     // Geometric operations
     dot(vec) { return this.x * vec.x + this.y * vec.y; }
     cross(vec) { return this.x * vec.y - this.y * vec.x; } // 2D cross product
-    magnitude() { return Math.sqrt(this.x * this.x + this.y * this.y); }
-
-    normalize() {
-        const mag = this.magnitude();
-        if (mag === 0) throw new Error("Cannot normalize a zero vector.");
-        return new Vec2(this.x / mag, this.y / mag);
+    mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
+    magSqr() { return this.x * this.x + this.y * this.y; }
+    
+    norm() {
+        const mag = this.mag();
+        return mag === 0 ? new Vec2(0, 0) : new Vec2(this.x / mag, this.y / mag)
     }
 
-    perpendicular() {
+    perp() {
         return new Vec2(-this.y, this.x);
     }
 
