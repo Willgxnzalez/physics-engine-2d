@@ -55,22 +55,31 @@ export class Body {
     }
 
     /**
-     * Make body static or dynamic
-     * @param {boolean} value - Whether body should be static
+     * Make the body static (immovable, infinite mass/inertia)
      */
-    setStatic(value) {
-        this.isStatic = !!value;
-        if (this.isStatic) {
-            this.mass = Infinity;
-            this.inertia = Infinity;
-            this.invMass = 0;
-            this.invInertia = 0;
-            this.velocity.set(0, 0);
-            this.angularVelocity = 0;
-        } else {
-            // Need to restore computed values - requires original mass/inertia
-            throw new Error('Converting static body to dynamic requires specifying mass');
+    makeStatic() {
+        this.isStatic = true;
+        this.mass = Infinity;
+        this.inertia = Infinity;
+        this.invMass = 0;
+        this.invInertia = 0;
+        this.velocity.set(0, 0);
+        this.angularVelocity = 0;
+    }
+    
+    /**
+     * Make the body dynamic (movable) with a given mass
+     * @param {number} mass - The mass to assign to the body
+     */
+    makeDynamic(mass) {
+        if (typeof mass !== 'number' || !isFinite(mass) || mass <= 0) {
+          throw new Error('Dynamic bodies require a positive mass');
         }
+        this.isStatic = false;
+        this.mass = mass;
+        this.invMass = 1 / mass;
+        this.inertia = this._computeInertia();
+        this.invInertia = this.inertia === 0 ? 0 : 1 / this.inertia;
     }
 
     /**
@@ -117,10 +126,18 @@ export class Body {
         this.setAngle(angle);
     }
 
+    /**
+     * Rotate the body by a given angle (in radians)
+     * @param {number} angle - Angle to rotate by (radians)
+     */
     rotate(angle) {
         this.setAngle(this.angle + angle);
     }
     
+    /**
+     * Translate the body by a given offset vector
+     * @param {Vec2} offset - Offset vector to translate by
+     */
     translate(offset) {
         this.setPosition(this.position.x + offset.x, this.position.y + offset.y);
     }
