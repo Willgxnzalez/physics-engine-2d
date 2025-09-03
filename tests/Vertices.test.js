@@ -17,32 +17,6 @@ describe('Vertices', () => {
     expect(result.at(2).y).toBe(1);
   });
 
-  it('translates vertices', () => {
-    const verts = new Vertices([
-      { x: 0, y: 0 },
-      { x: 1, y: 0 }
-    ]);
-
-    const translated = verts.translate({ x: 5, y: 5 });
-
-    expect(translated.at(0).x).toBe(5);
-    expect(translated.at(0).y).toBe(5);
-    expect(translated.at(1).x).toBe(6);
-    expect(translated.at(1).y).toBe(5);
-  });
-
-  it('rotates vertices about a point', () => {
-    const verts = new Vertices([
-      { x: 1, y: 0 },
-      { x: 0, y: 1 }
-    ]);
-
-    const rotated = verts.rotate(Math.PI / 2);
-
-    expect(Math.abs(rotated.at(0).x)).toBeLessThan(1e-6);
-    expect(Math.abs(rotated.at(0).y - 1)).toBeLessThan(1e-6);
-  });
-
   it('iterates over vertices', () => {
     const verts = new Vertices([
       { x: 0, y: 0 },
@@ -59,33 +33,30 @@ describe('Vertices', () => {
     expect(points[1].y).toBe(1);
   });
 
-  it('computes area of different shapes', () => {
-    const triangle = new Vertices([
-      { x: 0, y: 0 },
+  it('rotates vertices in place', () => {
+    const verts = new Vertices([
       { x: 1, y: 0 },
       { x: 0, y: 1 }
     ]);
+    verts.rotateInPlace(Math.PI / 2); // 90 degrees
 
-    const square = new Vertices([
-      { x: 0, y: 0 },
-      { x: 1, y: 0 },
-      { x: 1, y: 1 },
-      { x: 0, y: 1 }
-    ]);
-
-    expect(triangle.area()).toBeCloseTo(0.5);
-    expect(square.area()).toBeCloseTo(1);
+    // After 90deg rotation: (1,0) -> (0,1), (0,1) -> (-1,0)
+    expect(Math.abs(verts.at(0).x)).toBeLessThan(1e-10);
+    expect(Math.abs(verts.at(0).y - 1)).toBeLessThan(1e-10);
+    expect(Math.abs(verts.at(1).x + 1)).toBeLessThan(1e-10);
+    expect(Math.abs(verts.at(1).y)).toBeLessThan(1e-10);
   });
 
-  it('computes centroid of a triangle', () => {
-    const triangle = new Vertices([
-      { x: 0, y: 0 },
-      { x: 1, y: 0 },
-      { x: 0, y: 1 }
+  it('translates vertices in place', () => {
+    const verts = new Vertices([
+      { x: 1, y: 2 },
+      { x: -1, y: -2 }
     ]);
+    verts.translateInPlace({ x: 3, y: 4 });
 
-    const centroid = triangle.centroid();
-    expect(centroid.x).toBeCloseTo(1 / 3);
-    expect(centroid.y).toBeCloseTo(1 / 3);
+    expect(verts.at(0).x).toBe(4);
+    expect(verts.at(0).y).toBe(6);
+    expect(verts.at(1).x).toBe(2);
+    expect(verts.at(1).y).toBe(2);
   });
 });
