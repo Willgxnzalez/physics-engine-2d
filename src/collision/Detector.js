@@ -7,17 +7,18 @@ import { Collision } from './Collision.js';
 export class Detector {
     detect(bodies) {
         const manifolds = [];
-
+        
         for (let i = 0; i < bodies.length; i++) {
             for (let j = i + 1; j < bodies.length; j++) {
                 const bodyA = bodies[i];
                 const bodyB = bodies[j];
-
-                if (!bodyA.bounds || !bodyB.bounds) continue;
-
+                
+                // Skip if both bodies are static
+                if (bodyA.isStatic && bodyB.isStatic) continue;
+                
                 // Broad phase: AABB overlap test
                 if (!bodyA.bounds.overlaps(bodyB.bounds)) continue;
-
+                
                 // Narrow phase: SAT collision detection
                 const manifold = Collision.PolygonVsPolygon(bodyA, bodyB);
                 if (manifold.isValid()) {
