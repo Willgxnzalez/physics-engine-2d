@@ -28,7 +28,7 @@ export class Vec2 {
     dot(vec) { return this.x * vec.x + this.y * vec.y; }
     cross(vec) { return this.x * vec.y - this.y * vec.x; } // 2D cross product
     mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
-    magSqr() { return this.x * this.x + this.y * this.y; }
+    magSq() { return this.x * this.x + this.y * this.y; }
     
     normalize() {
         const mag = this.mag();
