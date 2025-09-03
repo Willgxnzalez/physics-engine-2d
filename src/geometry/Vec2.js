@@ -20,8 +20,9 @@ export class Vec2 {
     addEq(vec) { this.x += vec.x; this.y += vec.y; return this; }
     subEq(vec) { this.x -= vec.x; this.y -= vec.y; return this; }
     scaleEq(scalar) { this.x *= scalar; this.y *= scalar; return this; }
+    translateEq(vec) { this.x += vec.x; this.y += vec.y; return this; }
 
-    negate() { return new Vec2(-this.x, -this.y);}
+    negate() { return new Vec2(-this.x, -this.y); }
 
     // Geometric operations
     dot(vec) { return this.x * vec.x + this.y * vec.y; }
@@ -29,40 +30,33 @@ export class Vec2 {
     mag() { return Math.sqrt(this.x * this.x + this.y * this.y); }
     magSqr() { return this.x * this.x + this.y * this.y; }
     
-    norm() {
+    normalize() {
         const mag = this.mag();
-        return mag === 0 ? new Vec2(0, 0) : new Vec2(this.x / mag, this.y / mag)
+        if (mag === 0) return this;
+        this.x /= mag;
+        this.y /= mag;
+        return this;
     }
 
-    perp() {
-        return new Vec2(-this.y, this.x);
+    normalized() {
+        const mag = this.mag();
+        return mag === 0 ? new Vec2(0, 0) : new Vec2(this.x / mag, this.y / mag);
     }
 
-    // Euclidian Distance
+    perp() { return new Vec2(-this.y, this.x); }
+
     distanceTo(vec) {
         const dx = this.x - vec.x;
         const dy = this.y - vec.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-    // Transformations
-    rotate(angle, point = null) {
+    rotate(angle) {
         const cos = Math.cos(angle);
         const sin = Math.sin(angle);
-        
-        if (point) {
-            const translated = this.sub(point);
-            return new Vec2(
-                translated.x * cos - translated.y * sin,
-                translated.x * sin + translated.y * cos
-            ).addEq(point);
-        } else {
-            return new Vec2(
-                this.x * cos - this.y * sin,
-                this.x * sin + this.y * cos
-            );
-        }
+        return new Vec2(
+            this.x * cos - this.y * sin,
+            this.x * sin + this.y * cos
+        );
     }
-
-    translate(offset) { this.x += offset.x; this.y += offset.y; return this; }
 }
