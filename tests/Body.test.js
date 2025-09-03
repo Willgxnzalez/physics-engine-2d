@@ -67,7 +67,7 @@ describe('Body - Physical Property Setup', () => {
             expect(body.isStatic).toBe(false);
             expect(body.mass).toBe(10);
             
-            body.setStatic(true);
+            body.makeStatic();
             
             expect(body.isStatic).toBe(true);
             expect(body.mass).toBe(Infinity);
