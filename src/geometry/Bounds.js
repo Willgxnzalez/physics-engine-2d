@@ -1,3 +1,5 @@
+import { Vec2 } from './Vec2.js';
+
 /**
  * Bounds (Axis-Aligned Bounding Box - AABB)
  * 
@@ -5,60 +7,41 @@
  * - Broad-phase collision rejection
  * - Fast overlap checks before SAT
  * - Spatial partitioning (grids, quad trees, etc.)
- * 
- * Stores `min` and `max` points, provides useful spatial methods.
  */
-
-import { Vec2 } from './Vec2.js';
-
 export class Bounds { 
-    constructor(min = new Vec2(Infinity, Infinity), max = new Vec2(-Infinity, -Infinity)) {
-        this.min = min;
-        this.max = max;
+    constructor(minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity) {
+        this.minX = minX;
+        this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
     }
 
-    // Create bounds from an array of vertices
-    static fromVertices(vertices) {
-        if (!vertices || vertices.length === 0) {
-            return null;
+    // Update bounds from vertices
+    updateFromVertices(vertices) {
+        this.minX = Infinity;
+        this.minY = Infinity;
+        this.maxX = -Infinity;
+        this.maxY = -Infinity;
+
+        for (const vertex of vertices) {
+            if (vertex.x < this.minX) this.minX = vertex.x;
+            if (vertex.x > this.maxX) this.maxX = vertex.x;
+            if (vertex.y < this.minY) this.minY = vertex.y;
+            if (vertex.y > this.maxY) this.maxY = vertex.y;
         }
-
-        let minX = Infinity;
-        let maxX = -Infinity;
-        let minY = Infinity;
-        let maxY = -Infinity;
-
-        for (const v of vertices) {
-            if (v.x < minX) minX = v.x;
-            if (v.x > maxX) maxX = v.x;
-            if (v.y < minY) minY = v.y;
-            if (v.y > maxY) maxY = v.y;
-        }
-
-        return new Bounds(new Vec2(minX, minY), new Vec2(maxX, maxY));
     }
 
-    // Check if a point is inside the bounds
+    overlaps(other) {
+        return (this.minX < other.maxX &&
+                this.maxX > other.minX &&
+                this.minY < other.maxY &&
+                this.maxY > other.minY);
+    }
+
     contains(point) {
-        return (point.x >= this.min.x &&
-                point.x <= this.max.x &&
-                point.y >= this.min.y &&
-                point.y <= this.max.y
-        );
-    }
-
-    // Check if another AABB overlaps
-    overlaps(otherBounds) {
-        return (this.min.x < otherBounds.max.x &&
-                this.max.x > otherBounds.min.x &&
-                this.min.y < otherBounds.max.y &&
-                this.max.y > otherBounds.min.y
-        );
-    }
-
-    // Translate bounds by a given offset in-place
-    translate(offset) {
-        this.min.translate(offset);
-        this.max.translate(offset);
+        return (point.x >= this.minX &&
+                point.x <= this.maxX &&
+                point.y >= this.minY &&
+                point.y <= this.maxY);
     }
 }
