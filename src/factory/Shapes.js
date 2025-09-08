@@ -54,4 +54,27 @@ export class Shapes {
             segments
         });
     }
+
+    static Triangle(x, y, size, options = {}) {
+        if (size == null) {
+            throw new Error('Triangle requires a size');
+        }
+    
+        const h = size * Math.sqrt(3) / 2; // Height of equilateral triangle
+        const centroidOffset = h / 3; // Distance from base to centroid
+    
+        // Vertices centered around (0,0) as centroid, CCW order
+        const verts = [
+            new Vec2(-size / 2, -centroidOffset),      // Bottom-left
+            new Vec2(size / 2, -centroidOffset),       // Bottom-right
+            new Vec2(0, h - centroidOffset)            // Top
+        ];
+    
+        return new Body({
+            ...options,
+            position: new Vec2(x, y),
+            vertices: verts,
+            type: 'triangle'
+        });
+    }
 }
