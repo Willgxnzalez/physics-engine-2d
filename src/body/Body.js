@@ -187,13 +187,19 @@ export class Body {
     }
 
     updateWorldVerticesAndBounds() {
-        // Efficiently update world vertices
-        this.vertices = this.localVertices.clone();
-        if (this.angle !== 0) {
-            this.vertices.rotateInPlace(this.angle);
+        if (this.type === 'circle') {
+            this.bounds.set(
+                this.position.x - this.radius,
+                this.position.y - this.radius,
+                this.position.x + this.radius,
+                this.position.y + this.radius
+            );
+        } else {
+            this.vertices = this.localVertices.clone();
+            if (this.angle !== 0) this.vertices.rotateInPlace(this.angle);
+            this.vertices.translateInPlace(this.position);
+            this.bounds.updateFromVertices(this.vertices.points);
         }
-        this.vertices.translateInPlace(this.position);
-        this.bounds.updateFromVertices(this.vertices.points);
     }
 
     update(dt) {

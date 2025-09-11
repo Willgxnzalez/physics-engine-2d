@@ -16,7 +16,13 @@ export class Bounds {
         this.maxY = maxY;
     }
 
-    // Update bounds from vertices
+    set(minX, minY, maxX, maxY) {
+        this.minX = minX;
+        this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
+    }
+
     updateFromVertices(vertices) {
         this.minX = Infinity;
         this.minY = Infinity;
