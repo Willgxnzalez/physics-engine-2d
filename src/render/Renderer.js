@@ -1,24 +1,50 @@
+// Add renderer after the Engine class
 export class Renderer {
-    static render(ctx, bodies, debugMode = false) {
+    static renderBodies(ctx, bodies, debugMode = false) {
         ctx.strokeStyle = 'white';
         ctx.lineWidth = 1;
 
         for (const body of bodies) {
-            // Render the body shape
             ctx.beginPath();
-            
-            const vertices = body.vertices;
-            if (vertices.length > 0) {
-                const firstVertex = vertices.at(0);
-                ctx.moveTo(firstVertex.x, firstVertex.y);
+
+            if (body.type === 'circle') {
+                ctx.arc(body.position.x, body.position.y, body.radius, 0, Math.PI * 2);
+                ctx.stroke();
                 
-                for (const vertex of vertices) {
-                    ctx.lineTo(vertex.x, vertex.y);
+                // Draw rotation indicator line
+                ctx.save();
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                const endX = body.position.x + Math.cos(body.angle) * body.radius;
+                const endY = body.position.y + Math.sin(body.angle) * body.radius;
+                ctx.moveTo(body.position.x, body.position.y);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+                ctx.restore();
+            } else {
+                // Draw polygons (rect, triangle, etc)
+                const vertices = body.vertices.points;
+                if (vertices.length > 0) {
+                    const firstVertex = vertices[0];
+                    ctx.moveTo(firstVertex.x, firstVertex.y);
+                    for (let i = 1; i < vertices.length; i++) {
+                        ctx.lineTo(vertices[i].x, vertices[i].y);
+                    }
+                    ctx.closePath();
                 }
             }
-            
-            ctx.closePath();
+
             ctx.stroke();
+
+            // Render center of mass
+            if (debugMode) {
+                ctx.save();
+                ctx.fillStyle = 'cyan ';
+                ctx.beginPath();
+                ctx.arc(body.position.x, body.position.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
 
             // Render bounding box if debug mode is enabled
             if (debugMode && body.bounds) {
@@ -28,24 +54,68 @@ export class Renderer {
     }
 
     /**
-     * Render a bounding box for debugging
-     * @param {CanvasRenderingContext2D} ctx - Canvas context
-     * @param {Bounds} bounds - Bounding box to render
+     * Render contact points for debugging
      */
-    static renderBounds(ctx, bounds) {
-        // Save current context state
+    static renderContacts(ctx, manifolds) {
         ctx.save();
         
-        // Set bounding box style
+        for (const manifold of manifolds) {
+            // Render contact points
+            const contacts = manifold.contacts;            
+            ctx.fillStyle = '#A47DAB';
+            ctx.strokeStyle = '#A47DAB';
+            for (const contact of contacts) {
+                ctx.beginPath();
+                ctx.arc(contact.x, contact.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Render collision normal
+            if (manifold.contacts.length > 0) {
+                const contact = manifold.contacts[0];
+                const normalEnd = contact.add(manifold.normal.scale(30));
+                                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(contact.x, contact.y);
+                ctx.lineTo(normalEnd.x, normalEnd.y);
+                ctx.stroke();
+                
+                // Arrow head
+                const angle = Math.atan2(manifold.normal.y, manifold.normal.x);
+                const arrowLength = 8;
+                ctx.beginPath();
+                ctx.moveTo(normalEnd.x, normalEnd.y);
+                ctx.lineTo(
+                    normalEnd.x - arrowLength * Math.cos(angle - Math.PI / 6),
+                    normalEnd.y - arrowLength * Math.sin(angle - Math.PI / 6)
+                );
+                ctx.moveTo(normalEnd.x, normalEnd.y);
+                ctx.lineTo(
+                    normalEnd.x - arrowLength * Math.cos(angle + Math.PI / 6),
+                    normalEnd.y - arrowLength * Math.sin(angle + Math.PI / 6)
+                );
+                ctx.stroke();
+            }
+        }
+        
+        ctx.restore();
+    }
+
+    /**
+     * Render a bounding box for debugging
+     */
+    static renderBounds(ctx, bounds) {
+        ctx.save();
+        
         ctx.strokeStyle = '#faa900'; // Orange color for bounds
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 5]); // Dashed line for bounds
         
         // Draw the bounding box rectangle
-        const width = bounds.max.x - bounds.min.x;
-        const height = bounds.max.y - bounds.min.y;
+        const width = bounds.maxX - bounds.minX;
+        const height = bounds.maxY - bounds.minY;
         
-        ctx.strokeRect(bounds.min.x, bounds.min.y, width, height);
+        ctx.strokeRect(bounds.minX, bounds.minY, width, height);
         
         // Draw corner markers for better visibility
         ctx.setLineDash([]); // Solid lines for corners
@@ -54,58 +124,56 @@ export class Renderer {
         
         // Top-left corner
         ctx.beginPath();
-        ctx.moveTo(bounds.min.x, bounds.min.y);
-        ctx.lineTo(bounds.min.x + cornerSize, bounds.min.y);
-        ctx.moveTo(bounds.min.x, bounds.min.y);
-        ctx.lineTo(bounds.min.x, bounds.min.y + cornerSize);
+        ctx.moveTo(bounds.minX, bounds.minY);
+        ctx.lineTo(bounds.minX + cornerSize, bounds.minY);
+        ctx.moveTo(bounds.minX, bounds.minY);
+        ctx.lineTo(bounds.minX, bounds.minY + cornerSize);
         ctx.stroke();
         
         // Top-right corner
         ctx.beginPath();
-        ctx.moveTo(bounds.max.x, bounds.min.y);
-        ctx.lineTo(bounds.max.x - cornerSize, bounds.min.y);
-        ctx.moveTo(bounds.max.x, bounds.min.y);
-        ctx.lineTo(bounds.max.x, bounds.min.y + cornerSize);
+        ctx.moveTo(bounds.maxX, bounds.minY);
+        ctx.lineTo(bounds.maxX - cornerSize, bounds.minY);
+        ctx.moveTo(bounds.maxX, bounds.minY);
+        ctx.lineTo(bounds.maxX, bounds.minY + cornerSize);
         ctx.stroke();
         
         // Bottom-left corner
         ctx.beginPath();
-        ctx.moveTo(bounds.min.x, bounds.max.y);
-        ctx.lineTo(bounds.min.x + cornerSize, bounds.max.y);
-        ctx.moveTo(bounds.min.x, bounds.max.y);
-        ctx.lineTo(bounds.min.x, bounds.max.y - cornerSize);
+        ctx.moveTo(bounds.minX, bounds.maxY);
+        ctx.lineTo(bounds.minX + cornerSize, bounds.maxY);
+        ctx.moveTo(bounds.minX, bounds.maxY);
+        ctx.lineTo(bounds.minX, bounds.maxY - cornerSize);
         ctx.stroke();
         
         // Bottom-right corner
         ctx.beginPath();
-        ctx.moveTo(bounds.max.x, bounds.max.y);
-        ctx.lineTo(bounds.max.x - cornerSize, bounds.max.y);
-        ctx.moveTo(bounds.max.x, bounds.max.y);
-        ctx.lineTo(bounds.max.x, bounds.max.y - cornerSize);
+        ctx.moveTo(bounds.maxX, bounds.maxY);
+        ctx.lineTo(bounds.maxX - cornerSize, bounds.maxY);
+        ctx.moveTo(bounds.maxX, bounds.maxY);
+        ctx.lineTo(bounds.maxX, bounds.maxY - cornerSize);
         ctx.stroke();
         
-        // Restore context state
         ctx.restore();
     }
 
     /**
      * Render only bounding boxes (useful for broad-phase debugging)
-     * @param {CanvasRenderingContext2D} ctx - Canvas context
-     * @param {Array} bodies - Array of bodies
      */
     static renderBoundsOnly(ctx, bodies) {
+        ctx.save();
         ctx.strokeStyle = '#00ff00'; // Green for bounds-only mode
         ctx.lineWidth = 1;
         ctx.setLineDash([3, 3]);
         
         for (const body of bodies) {
             if (body.bounds) {
-                const width = body.bounds.max.x - body.bounds.min.x;
-                const height = body.bounds.max.y - body.bounds.min.y;
-                ctx.strokeRect(body.bounds.min.x, body.bounds.min.y, width, height);
+                const width = body.bounds.maxX - body.bounds.minX;
+                const height = body.bounds.maxY - body.bounds.minY;
+                ctx.strokeRect(body.bounds.minX, body.bounds.minY, width, height);
             }
         }
         
-        ctx.setLineDash([]);
+        ctx.restore();
     }
 }
