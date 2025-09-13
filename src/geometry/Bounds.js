@@ -38,10 +38,9 @@ export class Bounds {
     }
 
     overlaps(other) {
-        return (this.minX < other.maxX &&
-                this.maxX > other.minX &&
-                this.minY < other.maxY &&
-                this.maxY > other.minY);
+        // Check X axis first for early rejection
+        if (this.minX >= other.maxX || this.maxX <= other.minX) return false;
+        return (this.minY < other.maxY && this.maxY > other.minY);
     }
 
     contains(point) {
