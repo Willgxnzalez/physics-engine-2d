@@ -28,30 +28,16 @@ export class Shapes {
     }
 
     static Circle(x, y, radius, options = {}) {
-        if (radius == null) {
-            throw new Error('Circle requires a radius');
+        if (radius == null || typeof(radius) !== 'number') {
+            throw new Error('Circle requires a valid radius');
         }
-
-        const { segments = 24, ...restOptions } = options;
-
-        if (segments < 3) {
-            throw new Error('Circle must have at least 3 segments');
-        }
-
-        const verts = [];
-        // Counter-clockwise order
-        for (let i = 0; i < segments; i++) {
-            const angle = (i / segments) * Math.PI * 2;
-            verts.push(new Vec2(Math.cos(angle) * radius, Math.sin(angle) * radius));
-        }
-
+    
         return new Body({
-            ...restOptions, // Pass other options like mass, restitution etc.
+            ...options,
             position: new Vec2(x, y),
-            vertices: verts,
+            vertices: [],
             type: 'circle',
-            radius,
-            segments
+            radius
         });
     }
 
