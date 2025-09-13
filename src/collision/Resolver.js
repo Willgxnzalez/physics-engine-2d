@@ -1,84 +1,126 @@
 import { Vec2 } from '../geometry/Vec2.js';
 
 export class Resolver {
-    constructor({ iterations = 10 } = {}) {
-      this.iterations = iterations; // solver iterations for stability
-      this._cachedImpulses = new Map(); // future warm starting
+    constructor({ iterations = 8, positionCorrection = 0.2, slop = 0.02 } = {}) {
+        this.iterations = iterations;
+        this.positionCorrection = positionCorrection;
+        this.slop = slop;
     }
-  
+
     resolve(manifolds, dt) {
-      // Phase 1: Resolve velocities (impulse resolution)
-      for (let i = 0; i < this.iterations; i++) {
-        for (const m of manifolds) {
-          this._resolveVelocity(m, dt);
+        // Phase 1: Resolve velocities
+        for (let i = 0; i < this.iterations; i++) {
+            for (const manifold of manifolds) {
+                this._resolveVelocity(manifold, dt);
+            }
         }
-      }
-  
-      // Phase 2: Resolve positions (positional correction)
-      for (const m of manifolds) {
-        this._resolvePosition(m);
-      }
-    }
-  
-    _resolveVelocity(m, dt) {
-      const A = m.referenceBody;
-      const B = m.incidentBody;
-  
-      if (A.isStatic && B.isStatic) return;
-  
-      for (const contact of m.contacts) {
-        // rA, rB: vectors from COM to contact
-        const rA = contact.sub(A.position);
-        const rB = contact.sub(B.position);
-  
-        // relative velocity at contact
-        const vA = A.velocity.add(new Vec2(-A.angularVelocity * rA.y, A.angularVelocity * rA.x));
-        const vB = B.velocity.add(new Vec2(-B.angularVelocity * rB.y, B.angularVelocity * rB.x));
-        const rv = vB.sub(vA);
-  
-        const velAlongNormal = rv.dot(m.normal);
-        if (velAlongNormal > 0) continue; // separating
-  
-        const e = Math.min(A.restitution ?? 0.2, B.restitution ?? 0.2); // bounciness
-        const j = -(1 + e) * velAlongNormal /
-          (A.invMass + B.invMass +
-           rA.cross(m.normal) ** 2 * A.invInertia +
-           rB.cross(m.normal) ** 2 * B.invInertia);
-  
-        const impulse = m.normal.scale(j);
-  
-        if (!A.isStatic) {
-          A.velocity.subEq(impulse.scale(A.invMass));
-          A.angularVelocity -= rA.cross(impulse) * A.invInertia;
+        
+        // Phase 2: Resolve positions
+        for (const manifold of manifolds) {
+            this._resolvePosition(manifold);
         }
-        if (!B.isStatic) {
-          B.velocity.addEq(impulse.scale(B.invMass));
-          B.angularVelocity += rB.cross(impulse) * B.invInertia;
+    }
+
+    _resolveVelocity(manifold, dt) {
+        const bodyA = manifold.referenceBody;
+        const bodyB = manifold.incidentBody;
+    
+        if (bodyA.isStatic && bodyB.isStatic) return;
+    
+        const e = Math.min(bodyA.restitution, bodyB.restitution);
+        const friction = Math.sqrt(bodyA.friction * bodyB.friction);
+    
+        for (const contact of manifold.contacts) {
+            const rA = contact.sub(bodyA.position);
+            const rB = contact.sub(bodyB.position);
+    
+            // Relative velocity at contact point
+            const vA = bodyA.velocity.add(new Vec2(-bodyA.angularVelocity * rA.y, bodyA.angularVelocity * rA.x));
+            const vB = bodyB.velocity.add(new Vec2(-bodyB.angularVelocity * rB.y, bodyB.angularVelocity * rB.x));
+            const relativeVelocity = vB.sub(vA);
+    
+            // Normal impulse
+            const velocityAlongNormal = relativeVelocity.dot(manifold.normal);
+            if (velocityAlongNormal > 0) continue; // Objects separating
+    
+            const rAcrossN = rA.cross(manifold.normal);
+            const rBcrossN = rB.cross(manifold.normal);
+            const normalMass = bodyA.invMass + bodyB.invMass + 
+                              rAcrossN * rAcrossN * bodyA.invInertia + 
+                              rBcrossN * rBcrossN * bodyB.invInertia;
+    
+            const j = -(1 + e) * velocityAlongNormal / normalMass;
+            const impulse = manifold.normal.scale(j);
+    
+            // Apply normal impulse
+            if (!bodyA.isStatic) {
+                bodyA.velocity.subEq(impulse.scale(bodyA.invMass));
+                bodyA.angularVelocity -= rA.cross(impulse) * bodyA.invInertia;
+            }
+            if (!bodyB.isStatic) {
+                bodyB.velocity.addEq(impulse.scale(bodyB.invMass));
+                bodyB.angularVelocity += rB.cross(impulse) * bodyB.invInertia;
+            }
+    
+            // Friction impulse
+            const updatedVA = bodyA.velocity.add(new Vec2(-bodyA.angularVelocity * rA.y, bodyA.angularVelocity * rA.x));
+            const updatedVB = bodyB.velocity.add(new Vec2(-bodyB.angularVelocity * rB.y, bodyB.angularVelocity * rB.x));
+            const updatedRelativeVelocity = updatedVB.sub(updatedVA);
+    
+            const tangent = updatedRelativeVelocity.sub(manifold.normal.scale(updatedRelativeVelocity.dot(manifold.normal)));
+            if (tangent.mag() < 1e-6) continue; // Avoid division by near-zero
+    
+            const velocityAlongTangent = updatedRelativeVelocity.dot(tangent.normalize());
+            if (Math.abs(velocityAlongTangent) < 0.01) continue; // Threshold to stop small movements
+    
+            const rAcrossT = rA.cross(tangent);
+            const rBcrossT = rB.cross(tangent);
+            const tangentMass = bodyA.invMass + bodyB.invMass + 
+                                rAcrossT * rAcrossT * bodyA.invInertia + 
+                                rBcrossT * rBcrossT * bodyB.invInertia;
+    
+            let jt = -velocityAlongTangent / tangentMass;
+            const maxFriction = Math.abs(j * friction);
+            jt = Math.max(-maxFriction, Math.min(jt, maxFriction));
+    
+            const frictionImpulse = tangent.normalize().scale(jt);
+    
+            // Apply friction impulse
+            if (!bodyA.isStatic) {
+                bodyA.velocity.subEq(frictionImpulse.scale(bodyA.invMass));
+                bodyA.angularVelocity -= rA.cross(frictionImpulse) * bodyA.invInertia;
+            }
+            if (!bodyB.isStatic) {
+                bodyB.velocity.addEq(frictionImpulse.scale(bodyB.invMass));
+                bodyB.angularVelocity += rB.cross(frictionImpulse) * bodyB.invInertia;
+            }
         }
-      }
     }
-  
-    _resolvePosition(m) {
-      const A = m.referenceBody;
-      const B = m.incidentBody;
-      if (A.isStatic && B.isStatic) return;
-  
-      const percent = 0.2; // percentage of overlap to resolve this frame - not completely in one step
-      const slop = 0.01;   // penetration allowance - don't resolve unnoticable penetration
-  
-      const correctionMag = Math.max(m.penetration - slop, 0) / (A.invMass + B.invMass) * percent;
-      const correction = m.normal.scale(correctionMag);
-  
-      if (!A.isStatic) {
-        A.position.subEq(correction.scale(A.invMass));
-      }
-      if (!B.isStatic) {
-        B.position.addEq(correction.scale(B.invMass));
-      }
-  
-      // update vertices/bounds
-      A.updateWorldVerticesAndBounds();
-      B.updateWorldVerticesAndBounds();
+
+    _resolvePosition(manifold) {
+        const bodyA = manifold.referenceBody;
+        const bodyB = manifold.incidentBody;
+    
+        if (bodyA.isStatic && bodyB.isStatic) return;
+    
+        const clampedPenetration = Math.min(manifold.penetration, 1.0);
+    
+        const correctionMagnitude = Math.max(clampedPenetration - this.slop, 0) / 
+                                   (bodyA.invMass + bodyB.invMass) * this.positionCorrection;
+    
+        const correction = manifold.normal.scale(correctionMagnitude);
+    
+        if (bodyA.isStatic) {
+            bodyB.position.addEq(correction);
+            bodyB.updateWorldVerticesAndBounds();
+        } else if (bodyB.isStatic) {
+            bodyA.position.subEq(correction);
+            bodyA.updateWorldVerticesAndBounds();
+        } else {
+            bodyA.position.subEq(correction.scale(bodyA.invMass));
+            bodyB.position.addEq(correction.scale(bodyB.invMass));
+            bodyA.updateWorldVerticesAndBounds();
+            bodyB.updateWorldVerticesAndBounds();
+        }
     }
-  }
-  
+}
