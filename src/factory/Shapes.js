@@ -21,7 +21,6 @@ export class Shapes {
             ...options,
             position: new Vec2(x, y),
             vertices: verts,
-            type: 'rectangle',
             width,
             height
         });
@@ -60,7 +59,6 @@ export class Shapes {
             ...options,
             position: new Vec2(x, y),
             vertices: verts,
-            type: 'triangle'
         });
     }
 }
