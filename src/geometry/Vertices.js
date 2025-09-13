@@ -6,8 +6,14 @@ import { Vec2 } from './Vec2.js';
  */
 export class Vertices {
     constructor(pointsArray = []) {
-        this.points = pointsArray.map(p => p instanceof Vec2 ? p.clone() : new Vec2(p.x, p.y));
         this._normals = null;
+        this.points = pointsArray.map(p => p instanceof Vec2 ? p.clone() : new Vec2(p.x, p.y));
+        if (this.points.length >= 3) {
+            if (this.area() < 0) {
+                this.points.reverse();
+            }
+        }
+        
     }
     
     get length() { return this.points.length; }
@@ -71,4 +77,20 @@ export class Vertices {
     }
 
     clone() { return new Vertices(this.points); }
+
+    /**
+     * Compute the signed area of the polygon defined by these vertices.
+     * Positive area means counter-clockwise winding.
+     * @returns {number} The signed area of the polygon.
+     */
+    area() {
+        let area = 0;
+        const n = this.points.length;
+        for (let i = 0; i < n; i++) {
+            const p0 = this.points[i];
+            const p1 = this.points[(i + 1) % n];
+            area += (p0.x * p1.y - p1.x * p0.y);
+        }
+        return 0.5 * area;
+    }
 }
