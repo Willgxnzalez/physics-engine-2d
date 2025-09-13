@@ -10,17 +10,8 @@ export class Detector {
         this.collisionTable = new Map([
             ['circle-circle', Collision.CircleVsCircle],
             ['circle-polygon', (a, b) => Collision.CircleVsPolygon(a, b, false)],
-            ['circle-rectangle', (a, b) => Collision.CircleVsPolygon(a, b, false)], 
-            ['circle-triangle', (a, b) => Collision.CircleVsPolygon(a, b, false)],
             ['polygon-circle', (a, b) => Collision.CircleVsPolygon(a, b, true)],
-            ['rectangle-circle', (a, b) => Collision.CircleVsPolygon(a, b, true)],
-            ['triangle-circle', (a, b) => Collision.CircleVsPolygon(a, b, true)],
-            ['polygon-polygon', Collision.PolygonVsPolygon],
-            ['rectangle-rectangle', Collision.PolygonVsPolygon],
-            ['triangle-triangle', Collision.PolygonVsPolygon],
-            ['polygon-rectangle', Collision.PolygonVsPolygon],
-            ['polygon-triangle', Collision.PolygonVsPolygon],
-            ['rectangle-triangle', Collision.PolygonVsPolygon]
+            ['polygon-polygon', Collision.PolygonVsPolygon]
         ]);
     }
 
