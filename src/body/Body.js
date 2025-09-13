@@ -7,6 +7,8 @@ import { Bounds } from '../geometry/Bounds.js';
  * Handles position, velocity, forces, and geometry for physics simulation.
  */
 export class Body {
+    static nextId = 0;
+
     constructor({
         vertices = [],
         position = new Vec2(0, 0),
@@ -53,6 +55,8 @@ export class Body {
         this.inertia = this.isStatic ? Infinity : (inertia ?? this._computeInertia());
         this.invMass = this.isStatic ? 0 : 1 / this.mass;
         this.invInertia = (this.isStatic || this.inertia === 0) ? 0 : 1 / this.inertia;
+        
+        this.id = Body.nextId++;
         
         this.updateWorldVerticesAndBounds();
         Object.assign(this, props);
